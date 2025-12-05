@@ -407,16 +407,18 @@ wrote extracted data to "b64.txt".</code></pre>
 
             <h2 id="root">6. Root Flag (Reverse Engineering)</h2>
             <p>
-                The root flag wasn't a simple text file. I found a python script <code>root.py</code> which uses the Fernet library for encryption.
+                The root flag wasn't a simple text file. I found a python script <code>/root/root.py</code> which uses the Fernet library for encryption.
                 It required a key.
             </p>
             <p>
                 I searched the system and found a binary called <code>key_rev_key</code>. When I ran it, it asked for a name.
-                Inputting "charlie" or "wonka" failed. However, by simply trying random input, the binary printed the key!.
+                Inputting "charlie" or "wonka" failed. However, by using <code>strings</code>, I gainted the key!.
             </p>
             <pre class="cmd-output">
 Key: b'-VkgXhFf6sAEcAwrC6YR-SZbiuSb8ABXeQuvhcGSQzY='
             </pre>
+
+            <img src="images_chocolate-factory/strings.png" alt="Strings result" class="screenshot">
 
             <p>
                 Since I had trouble running the python script directly on the target machine, I used an online Fernet decryption tool.
