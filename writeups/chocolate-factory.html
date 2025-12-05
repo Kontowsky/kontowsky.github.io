@@ -360,14 +360,14 @@ wrote extracted data to "b64.txt".</code></pre>
             <pre><code>$ hashcat -m 1800 hash.txt /usr/share/wordlists/rockyou.txt</code></pre>
 
             <p>
-                Success! The password for charlie is: <strong style="color: var(--accent);">cn7824</strong>.
+                Success! The password for charlie is: <strong style="color: var(--accent);">****** (blurred)</strong>.
             </p>
 
             <img src="images_chocolate-factory/hashcat_cracked.png" alt="Hashcat Result" class="screenshot">
 
             <h2 id="foothold">4. Web Exploitation & Foothold</h2>
             <p>
-                With credentials in hand (<code>charlie:cn7824</code>), I went to the web server on port 80.
+                With credentials in hand (<code>charlie:****** (blurred)</code>), I went to the web server on port 80.
                 After logging into the "Squirrel Room" login form, I was presented with a <strong>Command Execution</strong> panel.
             </p>
 
@@ -414,9 +414,6 @@ wrote extracted data to "b64.txt".</code></pre>
                 I searched the system and found a binary called <code>key_rev_key</code>. When I ran it, it asked for a name.
                 Inputting "charlie" or "wonka" failed. However, by using <code>strings</code>, I gainted the key!.
             </p>
-            <pre class="cmd-output">
-Key: b'-VkgXhFf6sAEcAwrC6YR-SZbiuSb8ABXeQuvhcGSQzY='
-            </pre>
 
             <img src="images_chocolate-factory/strings.png" alt="Strings result" class="screenshot">
 
