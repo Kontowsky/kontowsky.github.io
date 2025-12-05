@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lian_Yu Write-up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --bg-sidebar: #181818;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --accent: #00bcd4;
+            --accent-hover: #008ba3;
+            --border: #333333;
+            --code-bg: #2d2d2d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .sidebar-nav {
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .back-link {
+            display: block;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #fff;
+        }
+
+        .article-content {
+            flex: 1;
+            padding: 50px 80px;
+            overflow-y: auto;
+            line-height: 1.8;
+        }
+
+        .machine-info,
+        .toc {
+            width: 100%;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .machine-info h3,
+        .toc h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .machine-info ul,
+        .toc ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .machine-info li {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .toc li {
+            margin-bottom: 8px;
+        }
+
+        .toc a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            transition: color 0.2s, padding-left 0.2s;
+            display: block;
+        }
+
+        .toc a:hover {
+            color: var(--accent);
+            padding-left: 5px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            color: #ff79c6;
+        }
+
+        .cmd-output {
+            color: #8be9fd;
+        }
+
+        img.screenshot {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin: 20px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .meta-tags {
+            margin-bottom: 40px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .tag {
+            background-color: var(--bg-card);
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-right: 10px;
+            border: 1px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .article-content {
+                padding: 30px 20px;
+            }
+        }
+
+        .tools-section {
+            width: 100%;
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .tools-section h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .tool-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tool-badge {
+            background-color: #252526;
+            color: #e0e0e0;
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            cursor: default;
+            transition: all 0.2s ease;
+        }
+
+        .tool-badge:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-nav">
+                <a href="../index.html" class="back-link">← Back to Home</a>
+            </div>
+
+            <div class="machine-info">
+                <h3>Target Info</h3>
+                <ul>
+                    <li><strong>Name:</strong> Lian_Yu</li>
+                    <li><strong>Site:</strong> TryHackMe</li>
+                    <li><strong>OS:</strong> <span style="color: #ff79c6;">Linux</span></li>
+                    <li><strong>Difficulty:</strong> <span style="color: #50fa7b;">Easy</span></li>
+                </ul>
+            </div>
+
+            <div class="toc">
+                <h3>Table of Contents</h3>
+                <ul>
+                    <li><a href="#recon">1. Reconnaissance</a></li>
+                    <li><a href="#web">2. Web Enumeration</a></li>
+                    <li><a href="#ftp">3. FTP & Stego</a></li>
+                    <li><a href="#ssh">4. SSH Access</a></li>
+                    <li><a href="#privesc">5. Privilege Escalation</a></li>
+                </ul>
+            </div>
+            <div class="tools-section">
+                <h3>Tools Arsenal</h3>
+                <div class="tool-tags">
+                    <span class="tool-badge">Nmap</span>
+                    <span class="tool-badge">Gobuster</span>
+                    <span class="tool-badge">Stegseek</span>
+                    <span class="tool-badge">Steghide</span>
+                    <span class="tool-badge">Pkexec</span>
+                </div>
+            </div>
+            <div style="text-align: center; color: var(--text-muted); margin-top: auto;">
+                <p>Created by <strong style="color: #fff;">Kontowsky</strong></p>
+            </div>
+        </aside>
+
+        <article class="article-content">
+
+            <h1>Lian_Yu</h1>
+            <div class="meta-tags">
+                <span class="tag">TryHackMe</span>
+                <span class="tag">Steganography</span>
+                <span class="tag">Privilege Escalation</span>
+                <span class="tag">Dec 05, 2025</span>
+            </div>
+
+            <p>
+                In this write-up, we explore the "Lian_Yu" room. This challenge involves web enumeration to find hidden directories,
+                decoding clues to gain FTP access, and using steganography techniques to retrieve SSH credentials. Finally, we exploit
+                a binary permission to gain root access.
+		<br>Link to the room: <a href="https://tryhackme.com/room/lianyu" target="_blank">https://tryhackme.com/room/lianyu</a>
+            </p>
+
+            <h2 id="recon">1. Reconnaissance</h2>
+            <p>
+                We start by scanning the target IP to discover open ports and services using Nmap.
+                I used the <code>-T4</code> flag for a faster scan.
+            </p>
+            <pre><code>$ sudo nmap -T4 10.81.140.114</code></pre>
+
+            <img src="images_lian-yu/nmap_scan.png" alt="Nmap Scan Results" class="screenshot">
+
+            <p>
+                The scan results show the following open ports:
+            </p>
+            <ul>
+                <li><strong>21/tcp:</strong> FTP (File Transfer Protocol)</li>
+                <li><strong>22/tcp:</strong> SSH</li>
+                <li><strong>80/tcp:</strong> HTTP (Web Server)</li>
+                <li><strong>111/tcp:</strong> RPCBind</li>
+            </ul>
+
+            <h2 id="web">2. Web Enumeration</h2>
+            <p>
+                I started by enumerating the web server using <strong>Gobuster</strong> to look for hidden directories.
+                I found a directory named <code>/island</code>, and going deeper, I discovered <code>/island/2100</code>.
+            </p>
+            <p>
+                Checking the source code of the page revealed a hint about a "ticket". So, I decided to search for files with the
+                <code>.ticket</code> extension.
+            </p>
+            <pre><code>$ gobuster dir -u http://10.81.140.114/island/2100 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -x .ticket</code></pre>
+
+            <img src="images_lian-yu/gobuster_scan.png" alt="Gobuster Scan" class="screenshot">
+
+            <p>
+                This revealed a file named <code>green_arrow.ticket</code>. When I accessed it, I found a token string:
+                <code>RTy8yhBQdscX</code>.
+            </p>
+            <p>
+                After decoding this string (it appeared to be Base58 related), I obtained a password: <code>[REDACTED]</code>.
+            </p>
+            <img src="images_lian-yu/ticket_decode.png" alt="Decoding Ticket" class="screenshot">
+
+            <h2 id="ftp">3. FTP & Steganography</h2>
+            <p>
+                The clue in the web source code mentioned the word "vigilante". Using <strong>vigilante</strong> as the username
+                and the password we just decoded, I successfully logged into the FTP server.
+            </p>
+            <p>
+                I found three images: <code>Leave_me_alone.png</code>, <code>Queen's_Gambit.png</code>, and <code>aa.jpg</code>.
+                I downloaded them all for analysis.
+            </p>
+            <img src="images_lian-yu/ftp_files.png" alt="FTP Files" class="screenshot">
+
+            <p>
+                I focused on <code>aa.jpg</code>. Using <code>steghide</code> with an empty passphrase didn't work.
+                So, I used <strong>Stegseek</strong> with the <code>rockyou.txt</code> wordlist to crack the passphrase.
+            </p>
+            <pre><code>$ stegseek --crack aa.jpg /usr/share/wordlists/rockyou.txt</code></pre>
+
+            <p>
+                Stegseek found the passphrase <code>[REDACTED]</code> and extracted a zip file containing <code>passwd.txt</code>.
+                Reading this file gave me a new password: <code>[REDACTED]</code>.
+            </p>
+            <img src="images_lian-yu/stegseek.png" alt="Stegseek Result" class="screenshot">
+
+            <h2 id="ssh">4. SSH Access</h2>
+            <p>
+                I had a password, but I needed a username. Checking the other files from FTP, specifically <code>other_user</code>,
+                I found references to "Slade Wilson". This led me to try the username <strong>slade</strong>.
+            </p>
+            <p>
+                I logged in via SSH using <code>slade</code> and the password found from the steganography step.
+            </p>
+            <pre><code>$ ssh slade@10.81.140.114</code></pre>
+
+            <p>
+                I was in! The user flag <code>user.txt</code> was in the home directory.
+            </p>
+            <img src="images_lian-yu/user_flag.png" alt="User Flag" class="screenshot">
+
+            <h2 id="privesc">5. Privilege Escalation</h2>
+            <p>
+                To escalate privileges to root, I checked the user's sudo rights using <code>sudo -l</code>.
+            </p>
+            <pre><code>User slade may run the following commands on LianYu:
+(root) PASSWD: /usr/bin/pkexec</code></pre>
+
+            <p>
+                The user can run <code>pkexec</code> as root. This is a known GTFOBins vector.
+                I executed the following command to spawn a root shell:
+            </p>
+            <pre><code>$ sudo pkexec /bin/sh</code></pre>
+
+            <p>
+                Success! I gained root access and retrieved the final flag.
+            </p>
+            <img src="images_lian-yu/root_shell.png" alt="Root Shell" class="screenshot">
+
+            <p>
+                <strong>Root Flag:</strong> <code>THM{[REDACTED]}</code>
+            </p>
+
+        </article>
+    </div>
+
+</body>
+</html>
