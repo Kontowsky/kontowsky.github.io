@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chocolate Factory Write-up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --bg-sidebar: #181818;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --accent: #00bcd4;
+            --accent-hover: #008ba3;
+            --border: #333333;
+            --code-bg: #2d2d2d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .sidebar-nav {
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .back-link {
+            display: block;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #fff;
+        }
+
+        .article-content {
+            flex: 1;
+            padding: 50px 80px;
+            overflow-y: auto;
+            line-height: 1.8;
+        }
+
+        .machine-info,
+        .toc {
+            width: 100%;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .machine-info h3,
+        .toc h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .machine-info ul,
+        .toc ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .machine-info li {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .toc li {
+            margin-bottom: 8px;
+        }
+
+        .toc a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            transition: color 0.2s, padding-left 0.2s;
+            display: block;
+        }
+
+        .toc a:hover {
+            color: var(--accent);
+            padding-left: 5px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            color: #ff79c6;
+        }
+
+        .cmd-output {
+            color: #8be9fd;
+        }
+
+        img.screenshot {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin: 20px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .meta-tags {
+            margin-bottom: 40px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .tag {
+            background-color: var(--bg-card);
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-right: 10px;
+            border: 1px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .article-content {
+                padding: 30px 20px;
+            }
+        }
+
+        .tools-section {
+            width: 100%;
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .tools-section h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .tool-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tool-badge {
+            background-color: #252526;
+            color: #e0e0e0;
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            cursor: default;
+            transition: all 0.2s ease;
+        }
+
+        .tool-badge:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-nav">
+                <a href="../index.html" class="back-link">← Back to Home</a>
+            </div>
+
+            <div class="machine-info">
+                <h3>Target Info</h3>
+                <ul>
+                    <li><strong>Name:</strong> Chocolate Factory</li>
+                    <li><strong>Site:</strong> TryHackMe</li>
+                    <li><strong>OS:</strong> <span style="color: #ff79c6;">Linux</span></li>
+                    <li><strong>Difficulty:</strong> <span style="color: #50fa7b;">Easy</span></li>
+                </ul>
+            </div>
+
+            <div class="toc">
+                <h3>Table of Contents</h3>
+                <ul>
+                    <li><a href="#recon">1. Reconnaissance</a></li>
+                    <li><a href="#ftp">2. FTP & Stego</a></li>
+                    <li><a href="#cracking">3. Password Cracking</a></li>
+                    <li><a href="#foothold">4. Web & Foothold</a></li>
+                    <li><a href="#privesc">5. Privilege Escalation</a></li>
+                    <li><a href="#root">6. Root Flag</a></li>
+                </ul>
+            </div>
+            <div class="tools-section">
+                <h3>Tools Arsenal</h3>
+                <div class="tool-tags">
+                    <span class="tool-badge">Nmap</span>
+                    <span class="tool-badge">FTP</span>
+                    <span class="tool-badge">Steghide</span>
+                    <span class="tool-badge">Hashcat</span>
+                    <span class="tool-badge">Python</span>
+                    <span class="tool-badge">GTFOBins</span>
+                </div>
+            </div>
+            <div style="text-align: center; color: var(--text-muted); margin-top: auto;">
+                <p>Created by <strong style="color: #fff;">Kontowsky</strong></p>
+            </div>
+        </aside>
+
+        <article class="article-content">
+
+            <h1>Chocolate Factory</h1>
+            <div class="meta-tags">
+                <span class="tag">TryHackMe</span>
+                <span class="tag">Linux</span>
+                <span class="tag">Privilege Escalation</span>
+                <span class="tag">Dec 05, 2025</span>
+            </div>
+
+            <p>
+                In this write-up, we tackle the "Chocolate Factory" room from TryHackMe.
+                We will go through enumeration, steganography, password cracking, and finally exploiting a sudo misconfiguration to gain root access.
+            </p>
+
+            <h2 id="recon">1. Reconnaissance</h2>
+            <p>
+                As always, we start with a basic Nmap scan to identify open ports and services.
+                I used <code>-T4</code> for speed.
+            </p>
+            <pre><code>$ sudo nmap -T4 10.81.186.84</code></pre>
+
+            <img src="images_chocolate-factory/nmap_scan.png" alt="Nmap Scan Results" class="screenshot">
+
+            <p>
+                The scan reveals a lot of open ports. The most interesting ones for our initial foothold are:
+            </p>
+            <ul>
+                <li><strong>21/tcp:</strong> FTP (File Transfer Protocol)</li>
+                <li><strong>80/tcp:</strong> HTTP (Web Server)</li>
+                <li><strong>22/tcp:</strong> SSH</li>
+            </ul>
+
+            <h2 id="ftp">2. FTP Enumeration & Steganography</h2>
+            <p>
+                I decided to check FTP first. It turns out <strong>Anonymous login</strong> is enabled.
+                After logging in, I listed the files and found an image named <code>gum_room.jpg</code>.
+            </p>
+            <pre><code>ftp> anonymous
+ftp> get gum_room.jpg</code></pre>
+
+            <p>
+                Since it's an image file in a CTF context, I immediately suspected steganography.
+                I used <code>steghide</code> to check for hidden data. Using an empty passphrase worked!
+            </p>
+            <pre><code>$ steghide extract -sf gum_room.jpg
+Enter passphrase: [EMPTY]
+wrote extracted data to "b64.txt".</code></pre>
+
+            <p>
+                The extracted file <code>b64.txt</code> contained Base64 encoded text.
+            </p>
+
+            <img src="images_chocolate-factory/b64_content.png" alt="Base64 Content" class="screenshot">
+
+            <h2 id="cracking">3. Password Cracking</h2>
+            <p>
+                Decoding the Base64 text revealed what looks like the <code>/etc/shadow</code> file from a Linux system.
+                I spotted a hash for the user <strong>charlie</strong>.
+            </p>
+            <pre><code>$ base64 -d b64.txt</code></pre>
+
+            <p>
+                I used <strong>Hashcat</strong> with mode <code>1800</code> (sha512crypt) and the <code>rockyou.txt</code> wordlist to crack it.
+            </p>
+            <pre><code>$ hashcat -m 1800 hash.txt /usr/share/wordlists/rockyou.txt</code></pre>
+
+            <p>
+                Success! The password for charlie is: <strong style="color: var(--accent);">cn7824</strong>.
+            </p>
+
+            <img src="images_chocolate-factory/hashcat_cracked.png" alt="Hashcat Result" class="screenshot">
+
+            <h2 id="foothold">4. Web Exploitation & Foothold</h2>
+            <p>
+                With credentials in hand (<code>charlie:cn7824</code>), I went to the web server on port 80.
+                After logging into the "Squirrel Room" login form, I was presented with a <strong>Command Execution</strong> panel.
+            </p>
+
+            <img src="images_chocolate-factory/web_interface.png" alt="Web Command Execution" class="screenshot">
+
+            <p>
+                I used this RCE capability to search the system. I found an SSH private key for Charlie!
+            </p>
+
+            <img src="images_chocolate-factory/ssh_key_found.png" alt="SSH Key Found" class="screenshot">
+
+            <p>
+                I copied the key to my local machine, set correct permissions (<code>chmod 600</code>), and logged in via SSH.
+            </p>
+            <pre><code>$ ssh -i charlie_id_rsa charlie@10.81.186.84</code></pre>
+
+            <p>
+                I was in. The user flag was located at <code>/home/charlie/user.txt</code>.
+            </p>
+
+            <h2 id="privesc">5. Privilege Escalation</h2>
+            <p>
+                To escalate privileges to root, I checked what commands Charlie could run with sudo using <code>sudo -l</code>.
+            </p>
+            <pre><code>User charlie may run the following commands:
+(ALL : root) NOPASSWD: /usr/bin/vi</code></pre>
+
+            <p>
+                We can run <code>vi</code> as root without a password. This is a classic "GTFOBins" vector.
+                I spawned a root shell using the following command:
+            </p>
+            <pre><code>$ sudo vi -c ':!/bin/sh' /dev/null</code></pre>
+
+            <p>I am now root!</p>
+
+            <img src="images_chocolate-factory/root_shell.png" alt="Root Shell Access" class="screenshot">
+
+            <h2 id="root">6. Root Flag (Reverse Engineering)</h2>
+            <p>
+                The root flag wasn't a simple text file. I found a python script <code>root.py</code> which uses the Fernet library for encryption.
+                It required a key.
+            </p>
+            <p>
+                I searched the system and found a binary called <code>key_rev_key</code>. When I ran it, it asked for a name.
+                Inputting "charlie" or "wonka" failed. However, by simply trying random input, the binary printed the key!.
+            </p>
+            <pre class="cmd-output">
+Key: b'-VkgXhFf6sAEcAwrC6YR-SZbiuSb8ABXeQuvhcGSQzY='
+            </pre>
+
+            <p>
+                Since I had trouble running the python script directly on the target machine, I used an online Fernet decryption tool.
+                I pasted the key and the encrypted message from <code>root.py</code>.
+            </p>
+
+            <img src="images_chocolate-factory/fernet_decrypt.png" alt="Fernet Decryption" class="screenshot">
+        </article>
+    </div>
+
+</body>
+</html>

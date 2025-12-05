@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Security Write-ups</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --bg-sidebar: #181818;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --accent: #00bcd4;
+            --accent-hover: #008ba3;
+            --border: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: #333;
+            margin-bottom: 20px;
+            object-fit: cover;
+            border: 2px solid var(--accent);
+        }
+
+        .sidebar h1 {
+            font-size: 1.5rem;
+            margin: 10px 0 5px 0;
+            color: #fff;
+        }
+
+        .sidebar h2 {
+            font-size: 0.9rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .bio {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .social-links a {
+            color: var(--text-main);
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid transparent;
+            transition: color 0.3s;
+        }
+
+        .social-links a:hover {
+            color: var(--accent);
+            border-bottom: 1px solid var(--accent);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 50px 60px;
+            overflow-y: auto;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 10px;
+            color: #fff;
+        }
+
+        .writeup-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: transform 0.2s, border-color 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+        }
+
+        .writeup-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent);
+        }
+
+        .writeup-card h3 {
+            margin: 0 0 10px 0;
+            color: var(--accent);
+            font-size: 1.3rem;
+        }
+
+        .writeup-card p {
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .meta-info {
+            font-size: 0.8rem;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .tag {
+            background-color: #333;
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+            .main-content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+
+        <aside class="sidebar">
+            <img src="avatar.jpg" alt="Profile Picture" class="avatar">
+
+            <h1>Kacper Kontowski</h1>
+            <h2>Cybersecurity student</h2>
+
+            <div class="bio">
+                <p>
+                    Welcome to my digital garden.<br> I document my journey through CTFs, machine breakdowns, and vulnerability research.
+                </p>
+                <p>
+                    Passionate about <strong>Web Security</strong> & <strong>Penetration testing</strong>.
+                </p>
+            </div>
+
+            <div class="social-links">
+                <a href="https://github.com/Kontowsky" target="_blank">GitHub</a>
+                <a href="https://www.linkedin.com/in/kacper-kontowski-4645a6355/" target="_blank">LinkedIn</a>
+                <a href="mailto:kacperkontowski@gmail.com">Contact</a>
+                <a href="https://www.credly.com/users/kacper-kontowski" target="_blank">Credly</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+
+            <h2 class="section-title">Latest Write-ups</h2>
+
+            <a href="writeups/chocolate-factory.html" class="writeup-card">
+                <h3>TryHackMe: Chocolate Factory</h3>
+                <p>
+                    A detailed walkthrough of the Chocolate Factory room. Covers Nmap scanning,
+                    steganography (hidden files in images), password cracking using Hashcat,
+                    and privilege escalation via sudo.
+                </p>
+                <div class="meta-info">
+                    <span>Dec 05, 2025</span>
+                    <span class="tag">TryHackMe</span>
+                </div>
+            </a>
+
+        </main>
+    </div>
+
+</body>
+</html>
