@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kontowsky's website</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root {
             --bg-body: #121212;
@@ -33,12 +35,13 @@
         .app-container {
             display: flex;
             width: 100%;
-            max-width: 1400px;
-            margin: 0 auto;
+            margin: 0; 
         }
 
+        /* --- SIDEBAR --- */
         .sidebar {
-            width: 300px;
+            width: 400px;
+            min-width: 400px;
             background-color: var(--bg-sidebar);
             border-right: 1px solid var(--border);
             padding: 40px 30px;
@@ -49,6 +52,13 @@
             position: sticky;
             top: 0;
             height: 100vh;
+            overflow-y: auto;   
+            overflow-x: hidden; 
+            scrollbar-width: none;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            display: none;
         }
 
         .avatar {
@@ -83,24 +93,73 @@
             margin-bottom: 30px;
         }
 
-        .social-links a {
+        /* --- Social Links --- */
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #252526;
             color: var(--text-main);
             text-decoration: none;
-            margin: 0 10px;
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
             font-size: 0.9rem;
-            border-bottom: 1px solid transparent;
-            transition: color 0.3s;
+            transition: all 0.3s ease;
         }
 
-        .social-links a:hover {
+        .social-btn i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+        }
+
+        .social-btn:hover {
+            border-color: var(--accent);
             color: var(--accent);
-            border-bottom: 1px solid var(--accent);
+            background-color: #2d2d2d;
+            transform: translateY(-2px);
         }
 
+        /* --- TryHackMe Badge --- */
+        .thm-badge {
+            margin-top: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .thm-badge iframe {
+            width: 100%;
+            height: 240px; 
+            overflow: hidden;
+        }
+
+        /* --- MAIN CONTENT --- */
         .main-content {
             flex: 1;
             padding: 50px 60px;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            /* ZMIANA: Wyrównanie do lewej (startu), a nie do środka */
+            align-items: flex-start; 
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 900px;
+            /* ZMIANA: Ten margines przesuwa treść w prawo od krawędzi.
+               Dzięki temu jest bliżej lewej strony, ale nie dotyka sidebara.
+               Możesz zmienić 10% na inną wartość (np. 100px), żeby dostosować przerwę. */
+            margin-left: 10%; 
         }
 
         .section-title {
@@ -109,6 +168,8 @@
             border-bottom: 2px solid var(--border);
             padding-bottom: 10px;
             color: #fff;
+            width: 100%;
+            text-align: left;
         }
 
         .writeup-card {
@@ -155,19 +216,25 @@
             font-size: 0.75rem;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
             .app-container {
                 flex-direction: column;
             }
             .sidebar {
                 width: 100%;
+                min-width: 0;
                 height: auto;
                 position: relative;
                 border-right: none;
                 border-bottom: 1px solid var(--border);
+                overflow-y: visible;
             }
             .main-content {
                 padding: 30px 20px;
+                align-items: center; /* Na telefonie wracamy do środka */
+            }
+            .content-wrapper {
+                margin-left: 0; /* Na telefonie usuwamy margines */
             }
         }
     </style>
@@ -192,68 +259,85 @@
             </div>
 
             <div class="social-links">
-                <a href="https://github.com/Kontowsky" target="_blank">GitHub</a>
-                <a href="https://www.linkedin.com/in/kacper-kontowski-4645a6355/" target="_blank">LinkedIn</a>
-                <a href="mailto:kacperkontowski@gmail.com">Contact</a>
-                <a href="https://www.credly.com/users/kacper-kontowski" target="_blank">Credly</a>
+                <a href="https://github.com/Kontowsky" target="_blank" class="social-btn">
+                    <i class="fab fa-github"></i> GitHub
+                </a>
+                <a href="https://www.linkedin.com/in/kacper-kontowski-4645a6355/" target="_blank" class="social-btn">
+                    <i class="fab fa-linkedin"></i> LinkedIn
+                </a>
+                <a href="mailto:kacperkontowski@gmail.com" class="social-btn">
+                    <i class="fas fa-envelope"></i> Contact
+                </a>
+                <a href="https://www.credly.com/users/kacper-kontowski" target="_blank" class="social-btn">
+                    <i class="fas fa-certificate"></i> Credly
+                </a>
+            </div>
+
+            <div class="thm-badge">
+                <iframe src="https://tryhackme.com/api/v2/badges/public-profile?userPublicId=3135315" style='border:none;'></iframe>
             </div>
         </aside>
 
         <main class="main-content">
-		<h2 class="section-title">Latest Write-ups</h2>
+            <div class="content-wrapper">
+                
+                <h2 class="section-title">Latest Write-ups</h2>
 
-		<a href="writeups/wgel-ctf.html" class="writeup-card">
-    		<h3>TryHackMe: Wgel CTF</h3>
-    		<p>
-       	 	A walkthrough of the Wgel CTF room. Includes enumeration of hidden web directories,
-        	extracting SSH keys, and exploiting sudo rights on the wget binary to exfiltrate the root flag.
-   	 	</p>
-    		<div class="meta-info">
-        		<span>Dec 05, 2025</span>
-        		<span class="tag">TryHackMe</span>
-    		</div>
-		</a>
+                <a href="writeups/idor-aoc2025.html" class="writeup-card">
+                    <h3>TryHackMe: IDOR (AoC 2025)</h3>
+                    <p>
+                        Investigating Insecure Direct Object References in a web application. 
+                        Exploiting User ID, Base64/MD5 encoded Child IDs, and time-based UUID 
+                        vulnerability to claim gift vouchers.
+                    </p>
+                    <div class="meta-info">
+                        <span>Dec 05, 2025</span>
+                        <span class="tag">Web / IDOR</span>
+                    </div>
+                </a>
 
-		<a href="writeups/idor-aoc2025.html" class="writeup-card">
-    		<h3>TryHackMe: IDOR (AoC 2025)</h3>
-    		<p>
-        	Investigating Insecure Direct Object References in a web application. 
-        	Exploiting User ID, Base64/MD5 encoded Child IDs, and time-based UUID 
-        	vulnerability to claim gift vouchers.
-   		</p>
-    	<div class="meta-info">
-        <span>Dec 05, 2025</span>
-        <span class="tag">Web / IDOR</span>
-    	</div>
-		</a>
+                <a href="writeups/lian-yu.html" class="writeup-card">
+                    <h3>TryHackMe: Lian_Yu</h3>
+                    <p>
+                        A comprehensive walkthrough of the Lian_Yu room. Features web enumeration 
+                        to discover hidden tickets, steganography analysis using Stegseek, 
+                        and root privilege escalation via pkexec misconfiguration.
+                    </p>
+                    <div class="meta-info">
+                        <span>Dec 05, 2025</span>
+                        <span class="tag">TryHackMe</span>
+                    </div>
+                </a>
 
-	    <a href="writeups/lian-yu.html" class="writeup-card">
-    		<h3>TryHackMe: Lian_Yu</h3>
-    		<p>
-        	A comprehensive walkthrough of the Lian_Yu room. Features web enumeration 
-        	to discover hidden tickets, steganography analysis using Stegseek, 
-        	and root privilege escalation via pkexec misconfiguration.
-   		</p>
-    	<div class="meta-info">
-        	<span>Dec 05, 2025</span>
-        	<span class="tag">TryHackMe</span>
-    	</div>
-	</a>
-            <a href="writeups/chocolate-factory.html" class="writeup-card">
-                <h3>TryHackMe: Chocolate Factory</h3>
-                <p>
-                    A detailed walkthrough of the Chocolate Factory room. Covers Nmap scanning,
-                    steganography (hidden files in images), password cracking using Hashcat,
-                    and privilege escalation via sudo.
-                </p>
-                <div class="meta-info">
-                    <span>Dec 05, 2025</span>
-                    <span class="tag">TryHackMe</span>
-                </div>
-            </a>
+                <a href="writeups/wgel-ctf.html" class="writeup-card">
+                    <h3>TryHackMe: Wgel CTF</h3>
+                    <p>
+                        A walkthrough of the Wgel CTF room. Includes enumeration of hidden web directories,
+                        extracting SSH keys, and exploiting sudo rights on the wget binary to exfiltrate the root flag.
+                    </p>
+                    <div class="meta-info">
+                        <span>Dec 05, 2025</span>
+                        <span class="tag">TryHackMe</span>
+                    </div>
+                </a>
 
+                <a href="writeups/chocolate-factory.html" class="writeup-card">
+                    <h3>TryHackMe: Chocolate Factory</h3>
+                    <p>
+                        A detailed walkthrough of the Chocolate Factory room. Covers Nmap scanning,
+                        steganography (hidden files in images), password cracking using Hashcat,
+                        and privilege escalation via sudo.
+                    </p>
+                    <div class="meta-info">
+                        <span>Dec 05, 2025</span>
+                        <span class="tag">TryHackMe</span>
+                    </div>
+                </a>
+                
+            </div>
         </main>
     </div>
+
 <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "ed03f38c876b450aad0249d433086aae"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
