@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GamingServer Write-up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --bg-sidebar: #181818;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --accent: #00bcd4;
+            --accent-hover: #008ba3;
+            --border: #333333;
+            --code-bg: #2d2d2d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .sidebar-nav {
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .back-link {
+            display: block;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #fff;
+        }
+
+        .article-content {
+            flex: 1;
+            padding: 50px 80px;
+            overflow-y: auto;
+            line-height: 1.8;
+        }
+
+        .machine-info,
+        .toc {
+            width: 100%;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .machine-info h3,
+        .toc h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .machine-info ul,
+        .toc ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .machine-info li {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .toc li {
+            margin-bottom: 8px;
+        }
+
+        .toc a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            transition: color 0.2s, padding-left 0.2s;
+            display: block;
+        }
+
+        .toc a:hover {
+            color: var(--accent);
+            padding-left: 5px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            color: #ff79c6;
+        }
+
+        .cmd-output {
+            color: #8be9fd;
+        }
+
+        img.screenshot {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin: 20px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .meta-tags {
+            margin-bottom: 40px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .tag {
+            background-color: var(--bg-card);
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-right: 10px;
+            border: 1px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .article-content {
+                padding: 30px 20px;
+            }
+        }
+
+        .tools-section {
+            width: 100%;
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .tools-section h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .tool-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tool-badge {
+            background-color: #252526;
+            color: #e0e0e0;
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            cursor: default;
+            transition: all 0.2s ease;
+        }
+
+        .tool-badge:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-nav">
+                <a href="../index.html" class="back-link">← Back to Home</a>
+            </div>
+
+            <div class="machine-info">
+                <h3>Target Info</h3>
+                <ul>
+                    <li><strong>Name:</strong> GamingServer</li>
+                    <li><strong>Site:</strong> TryHackMe</li>
+                    <li><strong>OS:</strong> <span style="color: #ff79c6;">Linux</span></li>
+                    <li><strong>Difficulty:</strong> <span style="color: #50fa7b;">Easy</span></li>
+                </ul>
+            </div>
+
+            <div class="toc">
+                <h3>Table of Contents</h3>
+                <ul>
+                    <li><a href="#recon">1. Reconnaissance</a></li>
+                    <li><a href="#web">2. Web Enumeration</a></li>
+                    <li><a href="#cracking">3. Cracking SSH Key</a></li>
+                    <li><a href="#user">4. Gaining Access</a></li>
+                    <li><a href="#privesc">5. Privilege Escalation</a></li>
+                </ul>
+            </div>
+            <div class="tools-section">
+                <h3>Tools Arsenal</h3>
+                <div class="tool-tags">
+                    <span class="tool-badge">Nmap</span>
+                    <span class="tool-badge">Gobuster</span>
+                    <span class="tool-badge">John the Ripper</span>
+                    <span class="tool-badge">LXD</span>
+                    <span class="tool-badge">Alpine</span>
+                </div>
+            </div>
+            <div style="text-align: center; color: var(--text-muted); margin-top: auto;">
+                <p>Created by <strong style="color: #fff;">Kontowsky</strong></p>
+            </div>
+        </aside>
+
+        <article class="article-content">
+
+            <h1>GamingServer</h1>
+            <div class="meta-tags">
+                <span class="tag">TryHackMe</span>
+                <span class="tag">Linux</span>
+                <span class="tag">LXD</span>
+                <span class="tag">Dec 06, 2025</span>
+            </div>
+
+            <p>
+                In this write-up, we tackle the "GamingServer" room. We will proceed from basic enumeration of a web server to finding 
+                hidden SSH keys, cracking them with a custom wordlist found on the target, and finally exploiting the LXD group to 
+                gain root access via container mounting.
+		<br>Link to the room: <a href="https://tryhackme.com/room/gamingserver" target="_blank">https://tryhackme.com/room/gamingserver</a>
+            </p>
+
+            <h2 id="recon">1. Reconnaissance</h2>
+            <p>
+                As always, I started the CTF with an Nmap scan to identify open ports and services. 
+                I used <code>-T4</code> for a faster scan.
+            </p>
+            <pre><code>$ sudo nmap -T4 10.80.190.177</code></pre>
+
+            <img src="images_gamingserver/image-365.png" alt="Nmap Scan Results" class="screenshot">
+
+            <p>
+                The scan revealed two main open ports:
+            </p>
+            <ul>
+                <li><strong>22/tcp:</strong> SSH</li>
+                <li><strong>80/tcp:</strong> HTTP (Web Server)</li>
+            </ul>
+
+            <h2 id="web">2. Web Enumeration</h2>
+            <p>
+                Since SSH usually requires credentials we don't have yet, I navigated to the website on port 80 first.
+            </p>
+            
+            <img src="images_gamingserver/image-366.png" alt="Website Homepage" class="screenshot">
+
+            <p>
+                I started clicking around to see how the site is structured. One path caught my attention immediately: <code>/uploads</code>.
+                I checked it out and found a directory listing.
+            </p>
+            
+            <img src="images_gamingserver/image-367.png" alt="Uploads Directory" class="screenshot">
+
+            <p>
+                There were three files: <code>dict.lst</code>, <code>manifesto.txt</code>, and <code>meme.jpg</code>.
+                I downloaded everything. The <code>dict.lst</code> file looked like a wordlist, which might be useful for password cracking later.
+            </p>
+            <p>
+                While analyzing the files, I started <strong>Gobuster</strong> in the background to look for hidden directories.
+            </p>
+            <pre><code>$ gobuster dir -u http://10.80.190.177 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt</code></pre>
+
+            <img src="images_gamingserver/image-368.png" alt="Gobuster Scan" class="screenshot">
+            
+            <p>
+                Gobuster found an interesting directory.
+                Inside that directory, I found a private SSH key!
+            </p>
+
+            <img src="images_gamingserver/image-369.png" alt="Encrypted SSH Key" class="screenshot">
+
+            <h2 id="cracking">3. Cracking SSH Key</h2>
+            <p>
+                The header <code>Proc-Type:4,ENCRYPTED</code> confirmed that the RSA key is password protected. 
+                I needed a passphrase to use it.
+            </p>
+            <p>
+                I remembered the <code>dict.lst</code> file I found in the <code>/uploads</code> folder earlier. 
+		It seemed like the perfect candidate for a wordlist.<br> I used <strong>John the Ripper</strong> to crack the hash.
+            </p>
+	    <pre><code>$ ssh2john secretKey > hash.txt</code></pre>
+            <pre><code>$ john hash.txt -w dict.lst</code></pre>
+
+            <img src="images_gamingserver/image-370.png" alt="John Cracking" class="screenshot">
+            
+            <p>
+                It worked! We found the passphrase for the key.
+            </p>
+
+            <h2 id="user">4. Gaining Access</h2>
+            <p>
+                We have the key and the passphrase, but we are still missing a username.
+                I went back to the website source code to look for clues.
+            </p>
+            
+            <img src="images_gamingserver/image-371.png" alt="Source Code Comment" class="screenshot">
+
+            <p>
+                I found a comment at the bottom of the HTML: 
+		<code>"[REDACTED] please add some actual content to the site! ... - douglas"</code>. 
+                This gave me a potential username.
+            </p>
+            <p>
+                I tried to log in via SSH using the cracked key and the username.
+            </p>
+
+            <img src="images_gamingserver/image-372.png" alt="SSH Login" class="screenshot">
+
+            <p>
+                And we are in! I listed the files and captured the <code>user.txt</code> flag.
+            </p>
+
+            <img src="images_gamingserver/image-373.png" alt="User Flag" class="screenshot">
+            <p>
+                <strong>User Flag:</strong> <code>[REDACTED]</code>
+            </p>
+
+            <h2 id="privesc">5. Privilege Escalation</h2>
+            <p>
+                To make privilege escalation easier, I transferred <strong>linpeas.sh</strong> to the machine, but I also manually checked user groups.
+            </p>
+            <pre><code>$ groups</code></pre>
+
+            <img src="images_gamingserver/image-374.png" alt="User Groups" class="screenshot">
+            <img src="images_gamingserver/image-375.png" alt="ID Command" class="screenshot">
+
+            <p>
+                I noticed the user was part of the <strong>lxd</strong> group. This is a very critical finding. 
+                LXD is a system container manager. Members of this group can escalate privileges by creating a privileged container 
+                and mounting the host's root file system into it. This effectively gives us read/write access to the entire host OS as root.
+            </p>
+
+            <p>
+                To exploit this, I first needed to build a compatible Alpine Linux image on my attacker machine:
+            </p>
+            <pre><code>$ git clone https://github.com/saghul/lxd-alpine-builder.git
+$ cd lxd-alpine-builder
+$ sudo ./build-alpine</code></pre>
+
+            <p>
+                After building it, I transferred the <code>.tar.gz</code> file to the target machine using a Python HTTP server.
+                Then, I executed the following commands on the target machine to import the image and initialize the container:
+            </p>
+            <pre><code>$ lxc image import ./alpine-v3.13-x86_64-*.tar.gz --alias myimage
+$ lxd init (accepted defaults)
+$ lxc init myimage mycontainer -c security.privileged=true
+$ lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursive=true
+$ lxc start mycontainer
+$ lxc exec mycontainer /bin/sh</code></pre>
+
+            <img src="images_gamingserver/image-376.png" alt="LXD Exploit" class="screenshot">
+
+            <p>
+                The command <code>lxc exec</code> dropped me into a root shell inside the container. 
+                Because I mounted the host's root directory to <code>/mnt/root</code>, I could navigate there and access the host filesystem.
+            </p>
+            <p>
+                I navigated to <code>/mnt/root/root</code> and found the final flag.
+            </p>
+
+            <img src="images_gamingserver/image-377.png" alt="Root Flag" class="screenshot">
+            
+            <p>
+                <strong>Root Flag:</strong> <code>[REDACTED]</code>
+            </p>
+
+        </article>
+    </div>
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "ed03f38c876b450aad0249d433086aae"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
