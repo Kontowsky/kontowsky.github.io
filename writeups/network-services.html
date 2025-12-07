@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Services Write-up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --bg-sidebar: #181818;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --accent: #00bcd4;
+            --accent-hover: #008ba3;
+            --border: #333333;
+            --code-bg: #2d2d2d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .sidebar-nav {
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .back-link {
+            display: block;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #fff;
+        }
+
+        .article-content {
+            flex: 1;
+            padding: 50px 80px;
+            overflow-y: auto;
+            line-height: 1.8;
+        }
+
+        .machine-info,
+        .toc {
+            width: 100%;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .machine-info h3,
+        .toc h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .machine-info ul,
+        .toc ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .machine-info li {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .toc li {
+            margin-bottom: 8px;
+        }
+
+        .toc a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            transition: color 0.2s, padding-left 0.2s;
+            display: block;
+        }
+
+        .toc a:hover {
+            color: var(--accent);
+            padding-left: 5px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            color: #ff79c6;
+        }
+
+        .cmd-output {
+            color: #8be9fd;
+        }
+
+        img.screenshot {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin: 20px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .meta-tags {
+            margin-bottom: 40px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .tag {
+            background-color: var(--bg-card);
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-right: 10px;
+            border: 1px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .article-content {
+                padding: 30px 20px;
+            }
+        }
+
+        .tools-section {
+            width: 100%;
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .tools-section h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .tool-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tool-badge {
+            background-color: #252526;
+            color: #e0e0e0;
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            cursor: default;
+            transition: all 0.2s ease;
+        }
+
+        .tool-badge:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-nav">
+                <a href="../index.html" class="back-link">← Back to Home</a>
+            </div>
+
+            <div class="machine-info">
+                <h3>Target Info</h3>
+                <ul>
+                    <li><strong>Name:</strong> Network Discovery</li>
+                    <li><strong>Site:</strong> TryHackMe</li>
+                    <li><strong>OS:</strong> <span style="color: #ff79c6;">Linux</span></li>
+                    <li><strong>Difficulty:</strong> <span style="color: #50fa7b;">Easy</span></li>
+                </ul>
+            </div>
+
+            <div class="toc">
+                <h3>Table of Contents</h3>
+                <ul>
+                    <li><a href="#recon">1. Reconnaissance</a></li>
+                    <li><a href="#ftp">2. FTP Key Fragment</a></li>
+                    <li><a href="#tbfc">3. TBFC Key Fragment</a></li>
+                    <li><a href="#dns">4. DNS Key Fragment</a></li>
+                    <li><a href="#internal">5. Internal Enumeration</a></li>
+                </ul>
+            </div>
+            <div class="tools-section">
+                <h3>Tools Arsenal</h3>
+                <div class="tool-tags">
+                    <span class="tool-badge">Nmap</span>
+                    <span class="tool-badge">FTP</span>
+                    <span class="tool-badge">Netcat</span>
+                    <span class="tool-badge">Dig</span>
+                    <span class="tool-badge">MySQL</span>
+                </div>
+            </div>
+            <div style="text-align: center; color: var(--text-muted); margin-top: auto;">
+                <p>Created by <strong style="color: #fff;">Kontowsky</strong></p>
+            </div>
+        </aside>
+
+        <article class="article-content">
+
+            <h1>Network Discovery - Scan-ta Clause (AoC 2025)</h1>
+            <div class="meta-tags">
+                <span class="tag">TryHackMe</span>
+                <span class="tag">Networking</span>
+                <span class="tag">Enumeration</span>
+		<span class="tag">AoC 2025</span>
+                <span class="tag">Dec 07, 2025</span>
+            </div>
+
+            <p>
+                In this write-up, we tackle the "Network Discovery - Scan-ta Clause" room. The goal is to collect three scattered key fragments 
+                from different services (FTP, a custom service, and DNS) to unlock a web console, and then perform internal 
+                enumeration to retrieve the final flag from a database.
+		<br>Link to the room: <a href="https://tryhackme.com/room/networkservices-aoc2025-jnsoqbxgky" target="_blank">https://tryhackme.com/room/networkservices-aoc2025-jnsoqbxgky</a>
+            </p>
+
+            <h2 id="recon">1. Reconnaissance</h2>
+            <p>
+                We start by scanning the target IP with Nmap to see what we are dealing with.
+            </p>
+            <pre><code>$ sudo nmap -T4 10.82.175.184</code></pre>
+
+            <img src="images_network-services/image-388.png" alt="Nmap Basic Scan" class="screenshot">
+
+            <p>
+                The scan shows Port 22 (SSH) and Port 80 (HTTP). Since we don't have SSH credentials, I checked the website.
+                It displays a lock screen asking for a "full key" composed of three fragments.
+            </p>
+            <img src="images_network-services/image-389.png" alt="Locked Website" class="screenshot">
+
+            <p>
+                To find these fragments, we need to look deeper. I ran a full port scan (<code>-p-</code>) and used script scanning 
+                (<code>--script=banner</code>) to identify what services are actually running on non-standard ports.
+            </p>
+            <pre><code>$ nmap -p- -T4 --script=banner 10.82.175.184</code></pre>
+            
+            <img src="images_network-services/image-390.png" alt="Nmap Full Scan" class="screenshot">
+
+            <p>
+                This revealed two new interesting ports: <strong>21212 (FTP)</strong> and <strong>25251 (Unknown TBFC service)</strong>.
+            </p>
+
+            <h2 id="ftp">2. FTP Key Fragment</h2>
+            <p>
+                Port 21212 is running FTP. A common misconfiguration in FTP servers is allowing <strong>Anonymous login</strong>.
+                I tried to connect using the username <code>anonymous</code> and it worked!
+            </p>
+            <pre><code>$ ftp 10.82.175.184 21212</code></pre>
+
+            <img src="images_network-services/image-391.png" alt="FTP Login" class="screenshot">
+
+            <p>
+                I listed the files and found <code>tbfc_qa_key1</code>. After downloading it using the <code>get</code> command, 
+                I read the file to get the first key fragment.
+            </p>
+            <img src="images_network-services/image-392.png" alt="Key 1" class="screenshot">
+            
+            <p>
+                <strong>Key 1:</strong> <code>[REDACTED]</code>
+            </p>
+
+            <h2 id="tbfc">3. TBFC Key Fragment</h2>
+            <p>
+                Next, I investigated the custom service on port 25251. Since it's a raw TCP service, we can use <strong>Netcat (nc)</strong> 
+                to connect to it and talk to it directly. Think of Netcat as a "manual telephone" for computers.
+            </p>
+            <pre><code>$ nc 10.82.175.184 25251</code></pre>
+
+            <img src="images_network-services/image-393.png" alt="Netcat Connection" class="screenshot">
+
+            <p>
+                The banner said "Type HELP for commands". I typed <code>HELP</code> and saw a <code>GET KEY</code> command.
+                Executing it revealed the second key fragment.
+            </p>
+            
+            <p>
+                <strong>Key 2:</strong> <code>[REDACTED]</code>
+            </p>
+
+            <h2 id="dns">4. DNS Key Fragment</h2>
+            <p>
+                We are still missing the third key. We scanned all TCP ports, so maybe the service is running on <strong>UDP</strong>. 
+                Services like DNS often use UDP. I ran a specific UDP scan.
+            </p>
+            <pre><code>$ sudo nmap -T4 -sU 10.82.175.184</code></pre>
+
+            <img src="images_network-services/image-394.png" alt="UDP Scan" class="screenshot">
+
+            <p>
+                We found Port 53 open (DNS). To query a DNS server manually, we use a tool called <strong>dig</strong>.
+                I queried the server for a specific TXT record based on the hint (<code>key3.tbfc.local</code>).
+            </p>
+            <pre><code>$ dig @10.82.175.184 TXT key3.tbfc.local</code></pre>
+
+            <img src="images_network-services/image-395.png" alt="Dig Results" class="screenshot">
+            
+            <p>
+                The DNS server responded with the text containing the final key fragment!
+            </p>
+            <p>
+                <strong>Key 3:</strong> <code>[REDACTED]</code>
+            </p>
+
+            <h2 id="internal">5. Internal Enumeration</h2>
+            <p>
+                With all three keys combined, I unlocked the website console. This gave me access to a terminal inside the system.
+            </p>
+            <img src="images_network-services/image-396.png" alt="Console Unlocked" class="screenshot">
+
+            <p>
+                Now that we are "inside", we can see things that were hidden from the outside. 
+                I used the command <code>ss -tulnp</code> to list all listening ports on the machine.
+            </p>
+            <img src="images_network-services/image-397.png" alt="Internal Ports" class="screenshot">
+
+            <p>
+                I noticed port <strong>3306</strong> listening on <code>127.0.0.1</code> (localhost). This is the standard port for <strong>MySQL</strong> database.
+                Since I was already on the system as the user <code>tbfcapp</code>, I tried accessing the database without a password (a common oversight in internal configs).
+            </p>
+            <pre><code>$ mysql -D tbfcqa01 -e "select * from flags;"</code></pre>
+
+            <img src="images_network-services/image-398.png" alt="MySQL Flag" class="screenshot">
+            
+            <p>
+                It worked! I dumped the content of the `flags` table and retrieved the final flag.
+            </p>
+            <p>
+                <strong>Final Flag:</strong> <code>THM{[REDACTED]}</code>
+            </p>
+
+        </article>
+    </div>
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "ed03f38c876b450aad0249d433086aae"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
