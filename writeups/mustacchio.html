@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mustacchio Write-up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --bg-sidebar: #181818;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --accent: #00bcd4;
+            --accent-hover: #008ba3;
+            --border: #333333;
+            --code-bg: #2d2d2d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .sidebar-nav {
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .back-link {
+            display: block;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #fff;
+        }
+
+        .article-content {
+            flex: 1;
+            padding: 50px 80px;
+            overflow-y: auto;
+            line-height: 1.8;
+        }
+
+        .machine-info,
+        .toc {
+            width: 100%;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .machine-info h3,
+        .toc h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .machine-info ul,
+        .toc ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .machine-info li {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .toc li {
+            margin-bottom: 8px;
+        }
+
+        .toc a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            transition: color 0.2s, padding-left 0.2s;
+            display: block;
+        }
+
+        .toc a:hover {
+            color: var(--accent);
+            padding-left: 5px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            color: #ff79c6;
+        }
+
+        .cmd-output {
+            color: #8be9fd;
+        }
+
+        img.screenshot {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin: 20px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .meta-tags {
+            margin-bottom: 40px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .tag {
+            background-color: var(--bg-card);
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-right: 10px;
+            border: 1px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .article-content {
+                padding: 30px 20px;
+            }
+        }
+
+        .tools-section {
+            width: 100%;
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .tools-section h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .tool-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tool-badge {
+            background-color: #252526;
+            color: #e0e0e0;
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            cursor: default;
+            transition: all 0.2s ease;
+        }
+
+        .tool-badge:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-nav">
+                <a href="../index.html" class="back-link">← Back to Home</a>
+            </div>
+
+            <div class="machine-info">
+                <h3>Target Info</h3>
+                <ul>
+                    <li><strong>Name:</strong> Mustacchio</li>
+                    <li><strong>Site:</strong> TryHackMe</li>
+                    <li><strong>OS:</strong> <span style="color: #ff79c6;">Linux</span></li>
+                    <li><strong>Difficulty:</strong> <span style="color: #50fa7b;">Easy</span></li>
+                </ul>
+            </div>
+
+            <div class="toc">
+                <h3>Table of Contents</h3>
+                <ul>
+                    <li><a href="#recon">1. Reconnaissance</a></li>
+                    <li><a href="#enum">2. Enumeration & Backup</a></li>
+                    <li><a href="#admin">3. Admin Panel</a></li>
+                    <li><a href="#xxe">4. XXE Exploitation</a></li>
+                    <li><a href="#ssh">5. SSH Access</a></li>
+                    <li><a href="#privesc">6. Privilege Escalation</a></li>
+                </ul>
+            </div>
+            <div class="tools-section">
+                <h3>Tools Arsenal</h3>
+                <div class="tool-tags">
+                    <span class="tool-badge">Nmap</span>
+                    <span class="tool-badge">Gobuster</span>
+                    <span class="tool-badge">Strings</span>
+                    <span class="tool-badge">John the Ripper</span>
+                    <span class="tool-badge">XXE</span>
+                </div>
+            </div>
+            <div style="text-align: center; color: var(--text-muted); margin-top: auto;">
+                <p>Created by <strong style="color: #fff;">Kontowsky</strong></p>
+            </div>
+        </aside>
+
+        <article class="article-content">
+
+            <h1>Mustacchio</h1>
+            <div class="meta-tags">
+                <span class="tag">TryHackMe</span>
+                <span class="tag">XXE</span>
+                <span class="tag">Path Hijacking</span>
+                <span class="tag">Dec 08, 2025</span>
+            </div>
+
+            <p>
+                In this write-up, we tackle the "Mustacchio" room. We will uncover hidden database backups, 
+                exploit an XML External Entity (XXE) vulnerability to steal SSH keys, and perform Path Hijacking 
+                on a custom SUID binary to gain root access.
+		<br>Link to the room: <a href="https://tryhackme.com/room/mustacchio" target="_blank">https://tryhackme.com/room/mustacchio</a>
+            </p>
+
+            <h2 id="recon">1. Reconnaissance</h2>
+            <p>
+                We start with a standard Nmap scan to identify open ports.
+            </p>
+            <pre><code>$ sudo nmap -T4 10.82.156.58</code></pre>
+
+            <img src="images_mustacchio/image-443.png" alt="Nmap Scan" class="screenshot">
+
+            <p>
+                We see two ports open: <strong>22 (SSH)</strong> and <strong>80 (HTTP)</strong>.
+                Visiting the website on port 80 shows a template site, which didn't reveal much on the surface.
+            </p>
+            <img src="images_mustacchio/image-444.png" alt="Website" class="screenshot">
+
+            <h2 id="enum">2. Enumeration & Backup</h2>
+            <p>
+                Since the main site was static, I used <strong>Gobuster</strong> to look for hidden directories.
+            </p>
+            <pre><code>$ gobuster dir -u http://10.82.156.58 -w ...</code></pre>
+
+            <img src="images_mustacchio/image-445.png" alt="Gobuster Scan" class="screenshot">
+
+            <p>
+                Gobuster found a directory <code>/custom</code>. Digging deeper into it, I found a subdirectory <code>/custom/js/</code> 
+                containing an interesting file: <code>users.bak</code>. A backup file!
+            </p>
+            <img src="images_mustacchio/image-446.png" alt="Users Backup" class="screenshot">
+
+            <p>
+                I downloaded the file. It was a SQLite database format. Running the <code>strings</code> command on it revealed a 
+                username <strong>admin</strong> and a SHA1 hash.
+            </p>
+            <img src="images_mustacchio/image-447.png" alt="Strings Output" class="screenshot">
+
+            <p>
+                I took the hash to <strong>CrackStation</strong> (an online hash cracker) and it successfully cracked it.
+            </p>
+            <img src="images_mustacchio/image-448.png" alt="CrackStation" class="screenshot">
+            
+            <p>
+                We now have the credentials: <code>admin : [REDACTED]</code>.
+            </p>
+
+            <h2 id="admin">3. Admin Panel</h2>
+            <p>
+                I tried to use these credentials for SSH, but they didn't work. I scanned the machine again, scanning ALL ports this time.
+            </p>
+            <pre><code>$ sudo nmap -T4 -p- 10.82.156.58</code></pre>
+
+            <img src="images_mustacchio/image-449.png" alt="Port 8765" class="screenshot">
+
+            <p>
+                We found a new port: <strong>8765</strong>. Visiting it in the browser showed an Admin Panel.
+                I logged in using the credentials I found earlier.
+            </p>
+            <img src="images_mustacchio/image-450.png" alt="Admin Login" class="screenshot">
+
+            <p>
+                After logging in, I saw a comment section. Inspecting the page source code revealed a comment left by the developer:
+                <code>"you can now SSH in using your key!"</code>. This is a huge hint.
+            </p>
+            <img src="images_mustacchio/image-451.png" alt="Comment Section" class="screenshot">
+            <img src="images_mustacchio/image-452.png" alt="Source Hint" class="screenshot">
+
+            <h2 id="xxe">4. XXE Exploitation</h2>
+            <p>
+                The comment section allows users to submit text. Since XML is often processed by web applications, 
+                I tested for <strong>XML External Entity (XXE)</strong> vulnerability.
+            </p>
+            <p>
+                XXE allows an attacker to interfere with an application's processing of XML data. If successful, we can force the server 
+                to read local files (like <code>/etc/passwd</code>) and display them to us.
+            </p>
+            <p>
+                I intercepted the request and injected a payload to read <code>/etc/passwd</code>.
+            </p>
+            <img src="images_mustacchio/image-453.png" alt="XXE /etc/passwd" class="screenshot">
+
+            <p>
+                It worked! I saw the user <strong>barry</strong> in the file.
+                Combining this with the hint "SSH in using your key", I modified the XXE payload to read Barry's private SSH key 
+                at <code>/home/barry/.ssh/id_rsa</code>.
+            </p>
+            <img src="images_mustacchio/image-454.png" alt="XXE Payload" class="screenshot">
+            <img src="images_mustacchio/image-455.png" alt="SSH Key Found" class="screenshot">
+
+            <h2 id="ssh">5. SSH Access</h2>
+            <p>
+                I saved the key, but it was encrypted with a passphrase. To crack it, I first converted it to a hash format using <code>ssh2john</code>.
+            </p>
+            <pre><code>$ ssh2john id_rsa > hash.txt</code></pre>
+
+            <p>
+                Then I used <strong>John the Ripper</strong> with the rockyou wordlist to crack the passphrase.
+            </p>
+            <img src="images_mustacchio/image-456.png" alt="John Cracking" class="screenshot">
+
+            <p>
+                Passphrase found! I logged in as Barry.
+            </p>
+            <img src="images_mustacchio/image-457.png" alt="SSH Login" class="screenshot">
+
+            <h2 id="privesc">6. Privilege Escalation (Path Hijacking)</h2>
+            <p>
+                Now for the most important part: escalating to root.
+                I searched for files with SUID permission (files that run with the owner's privileges, usually root).
+            </p>
+            <pre><code>$ find / -user root -perm /4000 2>/dev/null</code></pre>
+
+            <img src="images_mustacchio/image-458.png" alt="SUID Find" class="screenshot">
+
+            <p>
+                I found a custom binary: <code>/home/joe/live_log</code>.
+                I analyzed it using the <code>strings</code> command to see what it does.
+            </p>
+            <img src="images_mustacchio/image-459.png" alt="Strings live_log" class="screenshot">
+
+            <p>
+                The output shows that this binary executes the command: <code>tail -f /var/log/nginx/access.log</code>.
+                <strong>Critically, it uses the relative path `tail` instead of the absolute path `/usr/bin/tail`.</strong>
+            </p>
+
+            <h3>How Path Hijacking Works:</h3>
+            <p>
+                When a system runs a command like <code>tail</code> (without the full path), it looks through a list of directories 
+                defined in the <code>$PATH</code> environment variable to find that program. It checks folders from left to right.
+            </p>
+            <p>
+                We can exploit this by:
+                <ol>
+                    <li>Creating our own malicious file named <code>tail</code>.</li>
+                    <li>Placing it in a directory we control (like <code>/tmp</code>).</li>
+                    <li>Adding <code>/tmp</code> to the <strong>beginning</strong> of the <code>$PATH</code> variable.</li>
+                </ol>
+            </p>
+            <p>
+                When the SUID binary runs <code>tail</code>, the system will look in our <code>/tmp</code> folder first, find our malicious script, 
+                and execute IT instead of the real tail command. Since the original binary runs as Root, our script will also run as Root.
+            </p>
+
+            <h3>Execution:</h3>
+            <p>
+                1. I went to <code>/tmp</code> and created a file named <code>tail</code> containing just <code>/bin/bash</code>.
+                2. I made it executable (<code>chmod +x tail</code>).
+                3. I modified the PATH variable: <code>export PATH=/tmp:$PATH</code>.
+                4. I ran the vulnerable binary: <code>/home/joe/live_log</code>.
+            </p>
+
+            <img src="images_mustacchio/image-460.png" alt="Root Exploit" class="screenshot">
+
+            <p>
+                The binary tried to run "tail", but ran my shell instead. I instantly became root and captured the final flag!
+            </p>
+            
+            <p>
+                <strong>Root Flag:</strong> <code>[REDACTED]</code>
+            </p>
+
+        </article>
+    </div>
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "ed03f38c876b450aad0249d433086aae"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
