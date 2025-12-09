@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lookup Write-up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --bg-sidebar: #181818;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --accent: #00bcd4;
+            --accent-hover: #008ba3;
+            --border: #333333;
+            --code-bg: #2d2d2d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .sidebar-nav {
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .back-link {
+            display: block;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #fff;
+        }
+
+        .article-content {
+            flex: 1;
+            padding: 50px 80px;
+            overflow-y: auto;
+            line-height: 1.8;
+        }
+
+        .machine-info,
+        .toc {
+            width: 100%;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .machine-info h3,
+        .toc h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .machine-info ul,
+        .toc ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .machine-info li {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .toc li {
+            margin-bottom: 8px;
+        }
+
+        .toc a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            transition: color 0.2s, padding-left 0.2s;
+            display: block;
+        }
+
+        .toc a:hover {
+            color: var(--accent);
+            padding-left: 5px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            color: #ff79c6;
+        }
+
+        .cmd-output {
+            color: #8be9fd;
+        }
+
+        img.screenshot {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin: 20px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .meta-tags {
+            margin-bottom: 40px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .tag {
+            background-color: var(--bg-card);
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-right: 10px;
+            border: 1px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .article-content {
+                padding: 30px 20px;
+            }
+        }
+
+        .tools-section {
+            width: 100%;
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .tools-section h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .tool-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tool-badge {
+            background-color: #252526;
+            color: #e0e0e0;
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            cursor: default;
+            transition: all 0.2s ease;
+        }
+
+        .tool-badge:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-nav">
+                <a href="../index.html" class="back-link">← Back to Home</a>
+            </div>
+
+            <div class="machine-info">
+                <h3>Target Info</h3>
+                <ul>
+                    <li><strong>Name:</strong> Lookup</li>
+                    <li><strong>Site:</strong> TryHackMe</li>
+                    <li><strong>OS:</strong> <span style="color: #ff79c6;">Linux</span></li>
+                    <li><strong>Difficulty:</strong> <span style="color: #50fa7b;">Easy</span></li>
+                </ul>
+            </div>
+
+            <div class="toc">
+                <h3>Table of Contents</h3>
+                <ul>
+                    <li><a href="#recon">1. Reconnaissance</a></li>
+                    <li><a href="#user-enum">2. Username Enumeration</a></li>
+                    <li><a href="#rce">3. RCE via elFinder</a></li>
+                    <li><a href="#reverse">4. Binary Reverse Engineering</a></li>
+                    <li><a href="#path">5. PATH Hijacking Exploit</a></li>
+                    <li><a href="#lateral">6. Lateral Movement</a></li>
+                    <li><a href="#root">7. Root Escalation</a></li>
+                </ul>
+            </div>
+            <div class="tools-section">
+                <h3>Tools Arsenal</h3>
+                <div class="tool-tags">
+                    <span class="tool-badge">Nmap</span>
+                    <span class="tool-badge">Burp Suite</span>
+                    <span class="tool-badge">Hydra</span>
+                    <span class="tool-badge">Strings</span>
+                    <span class="tool-badge">Exploit-DB</span>
+                </div>
+            </div>
+            <div style="text-align: center; color: var(--text-muted); margin-top: auto;">
+                <p>Created by <strong style="color: #fff;">Kontowsky</strong></p>
+            </div>
+        </aside>
+
+        <article class="article-content">
+
+            <h1>Lookup</h1>
+            <div class="meta-tags">
+                <span class="tag">TryHackMe</span>
+                <span class="tag">Web</span>
+                <span class="tag">PATH Hijacking</span>
+                <span class="tag">Dec 09, 2025</span>
+            </div>
+
+            <p>
+                "Lookup" is an interesting room that demonstrates how subtle differences in server responses can lead to user enumeration.
+                We will exploit a vulnerable web file manager, analyze a custom binary, and perform a PATH hijacking attack to steal credentials. <br>Link to the room: <a href="https://tryhackme.com/room/lookup" target="_blank">https://tryhackme.com/room/lookup</a>
+            </p>
+
+            <h2 id="recon">1. Reconnaissance</h2>
+            <p>
+                We begin with a standard Nmap scan to identify open ports.
+            </p>
+            <pre><code>$ sudo nmap -T4 10.82.179.211</code></pre>
+
+            <img src="images_lookup/image-461.png" alt="Nmap Scan" class="screenshot">
+
+            <p>
+                The scan reveals two open ports: <strong>22 (SSH)</strong> and <strong>80 (HTTP)</strong>.
+                Visiting the website presents a login panel.
+            </p>
+            <img src="images_lookup/image-462.png" alt="Login Panel" class="screenshot">
+
+            <h2 id="user-enum">2. Username Enumeration</h2>
+            <p>
+                I didn't have any credentials, so I started looking for ways to enumerate users. 
+                I intercepted the login request using <strong>Burp Suite</strong> and noticed a critical information disclosure.
+            </p>
+            <p>
+                When I tried logging in as <code>admin</code>, the server responded with <strong>"Wrong password"</strong>.
+                However, when I tried a random username like <code>test</code>, the message was <strong>"Wrong username or password"</strong>.
+            </p>
+            <img src="images_lookup/image-463.png" alt="Burp Response Analysis" class="screenshot">
+            <img src="images_lookup/image-464.png" alt="Burp Detail" class="screenshot">
+            <p>
+                This difference allows us to verify if a username exists. I used <strong>Hydra</strong> to brute-force usernames 
+                from a wordlist, filtering for the response "Wrong password".
+            </p>
+            <pre><code>hydra -L /usr/share/wordlists/seclists/Usernames/Names/names.txt -p a lookup.thm http-post-form "/login.php:username=^USER^&password=^PASS^:S=Wrong password."</code></pre>
+
+            <img src="images_lookup/image-465.png" alt="Hydra Username Scan" class="screenshot">
+
+            <p>
+                Hydra found a valid user: <strong>jose</strong>.
+                Now I ran Hydra again, this time to brute-force the password for `jose`.
+            </p>
+            <img src="images_lookup/image-466.png" alt="Hydra Password Crack" class="screenshot">
+
+            <p>
+                Success! We found the password.
+            </p>
+
+            <h2 id="rce">3. RCE via elFinder</h2>
+            <p>
+                After logging in as `jose`, I was presented with a web file manager interface.
+            </p>
+            <img src="images_lookup/image-467.png" alt="elFinder Interface" class="screenshot">
+
+            <p>
+                Checking the "About" section revealed the software is <strong>elFinder 2.1.47</strong>.
+                A quick search on Exploit-DB revealed that this version is vulnerable to Command Injection (CVE-2019-9194).
+            </p>
+            <img src="images_lookup/image-468.png" alt="Version Check" class="screenshot">
+            <img src="images_lookup/image-469.png" alt="Exploit-DB" class="screenshot">
+
+            <p>
+                I downloaded a Python exploit script from GitHub designed for this CVE.
+            </p>
+            <img src="images_lookup/image-470.png" alt="GitHub Exploit" class="screenshot">
+
+            <p>
+                I set up a Netcat listener and executed the exploit to get a reverse shell.
+            </p>
+            <img src="images_lookup/image-471.png" alt="Exploit Execution" class="screenshot">
+            <img src="images_lookup/image-472.png" alt="Reverse Shell" class="screenshot">
+
+            <h2 id="reverse">4. Binary Reverse Engineering</h2>
+            <p>
+                Now inside the machine as `www-data`, I started enumerating the file system. 
+                I found an unusual custom binary located at <code>/usr/sbin/pwm</code>.
+            </p>
+            <img src="images_lookup/image-474.png" alt="Finding pwm binary" class="screenshot">
+
+            <p>
+                To understand what this binary does, I used the <code>strings</code> command. This extracts readable text from the compiled file.
+            </p>
+            <img src="images_lookup/image-475.png" alt="Strings Analysis" class="screenshot">
+
+            <p>
+                The analysis of the strings revealed critical logic:
+            </p>
+            <ul>
+                <li>The binary tries to run the <code>id</code> command: <code>[!] Running 'id' command...</code></li>
+                <li>It expects a specific output format: <code>uid=%u(...)</code></li>
+                <li>It tries to access a file: <code>/home/%s/.passwords</code></li>
+            </ul>
+            <p>
+                <strong>The Vulnerability:</strong> The binary calls the `id` command directly, likely without specifying the full path (e.g., just `id` instead of `/usr/bin/id`). 
+                This makes it vulnerable to <strong>PATH Hijacking</strong>.
+            </p>
+
+            <h2 id="path">5. PATH Hijacking Exploit</h2>
+            <p>
+                To exploit this, we need to trick the binary into running <em>our</em> malicious code instead of the real system `id` command.
+            </p>
+
+            <h3>Step 1: Mocking the `id` command</h3>
+            <p>
+                The binary parses the output of `id`. If we just create a script that opens a shell, the binary might crash or fail its internal checks because it expects specific text (uid, gid).
+                So, I created a fake `id` script in <code>/tmp</code> that simply echoes the expected format.
+            </p>
+            <pre><code>echo '#!/bin/bash' > /tmp/id
+echo 'echo "uid=33(think) gid=33(think) groups=(think)"' >> /tmp/id
+chmod +x /tmp/id</code></pre>
+            <p>
+                <em>Note: I mimicked the output format seen in the strings analysis to pass the binary's checks.</em>
+            </p>
+
+            <h3>Step 2: Manipulating the PATH</h3>
+            <p>
+                The <code>$PATH</code> environment variable tells Linux where to look for executable files. 
+                By adding <code>/tmp</code> to the <strong>beginning</strong> of the PATH, we force the system to check <code>/tmp</code> first.
+            </p>
+            <pre><code>export PATH=/tmp:$PATH</code></pre>
+
+            <h3>Step 3: Execution</h3>
+            <p>
+                Now, when I run <code>/usr/sbin/pwm</code>, the system looks for `id`, finds my script in `/tmp/id`, and executes it. 
+                The binary accepts the fake output and proceeds to dump the passwords!
+            </p>
+            <img src="images_lookup/image-476.png" alt="Exploit Execution" class="screenshot">
+
+            <p>
+                The binary printed a list of potential passwords for the user <strong>think</strong>.
+            </p>
+
+            <h2 id="lateral">6. Lateral Movement</h2>
+            <p>
+                I saved the leaked passwords to a file and used Hydra to brute-force the SSH login for user `think`.
+            </p>
+            <img src="images_lookup/image-477.png" alt="Hydra SSH" class="screenshot">
+
+            <p>
+                Hydra found the correct password quickly. I logged in via SSH and captured the user flag.
+            </p>
+            <img src="images_lookup/image-478.png" alt="User Flag" class="screenshot">
+
+            <h2 id="root">7. Root Escalation</h2>
+            <p>
+                To get root, I checked the sudo permissions for the user `think`.
+            </p>
+            <pre><code>$ sudo -l</code></pre>
+
+            <img src="images_lookup/image-479.png" alt="Sudo Permissions" class="screenshot">
+
+            <p>
+                The user can run <code>/usr/bin/look</code> as root. I checked GTFOBins and found that `look` can be used to read files.
+            </p>
+            <img src="images_lookup/image-480.png" alt="GTFOBins Look" class="screenshot">
+
+            <p>
+                I used this to read the root flag directly.
+            </p>
+            <pre><code>$ sudo look '' /root/root.txt</code></pre>
+
+            <img src="images_lookup/image-481.png" alt="Root Flag" class="screenshot">
+            
+            <p>
+                <strong>Root Flag:</strong> <code>[REDACTED]</code>
+            </p>
+
+        </article>
+    </div>
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "ed03f38c876b450aad0249d433086aae"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
