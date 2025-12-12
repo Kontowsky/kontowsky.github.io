@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kontowsky's website</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -17,432 +17,315 @@
             --accent: #00bcd4;
             --accent-hover: #008ba3;
             --border: #333333;
+            --status-progress: #e6c07b;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
             margin: 0;
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .app-container {
-            display: flex;
+            display: grid;
+            grid-template-columns: 450px 1fr 350px;
+            height: 100vh;
             width: 100%;
-            margin: 0; 
+            overflow: hidden;
+            gap: 0;
         }
 
-        /* --- SIDEBAR --- */
-        .sidebar {
-            width: 400px;
-            min-width: 400px;
+        .left-sidebar {
             background-color: var(--bg-sidebar);
             border-right: 1px solid var(--border);
-            padding: 40px 30px;
+            padding: 40px 40px;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            overflow-y: auto;   
-            overflow-x: hidden; 
+            height: 100%;
+            overflow-y: auto;
             scrollbar-width: none;
         }
-
-        .sidebar::-webkit-scrollbar {
-            display: none;
-        }
+        .left-sidebar::-webkit-scrollbar { display: none; }
 
         .avatar {
-            width: 120px;
-            height: 120px;
+            width: 130px;
+            height: 130px;
             border-radius: 50%;
             background-color: #333;
             margin-bottom: 20px;
             object-fit: cover;
-            border: 2px solid var(--accent);
+            border: 3px solid var(--accent);
         }
 
-        .sidebar h1 {
-            font-size: 1.5rem;
-            margin: 10px 0 5px 0;
-            color: #fff;
-        }
+        .left-sidebar h1 { font-size: 1.8rem; margin: 10px 0 5px 0; color: #fff; }
+        .left-sidebar h2 { font-size: 0.95rem; color: var(--accent); text-transform: uppercase; margin-bottom: 30px; font-weight: 700; letter-spacing: 1px; }
+        
+        .bio { font-size: 1rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 40px; width: 100%; }
 
-        .sidebar h2 {
-            font-size: 0.9rem;
-            color: var(--accent);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
-
-        .bio {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-
-        /* --- Social Links --- */
-        .social-links {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-
+        .social-links { display: flex; flex-direction: column; gap: 12px; width: 100%; margin-bottom: 40px; }
         .social-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #252526;
-            color: var(--text-main);
-            text-decoration: none;
-            padding: 10px 15px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center;
+            background-color: #252526; color: var(--text-main);
+            text-decoration: none; padding: 12px; border-radius: 8px;
+            border: 1px solid var(--border); font-size: 0.95rem; transition: all 0.2s;
         }
+        .social-btn i { margin-right: 12px; font-size: 1.1rem; }
+        .social-btn:hover { border-color: var(--accent); color: var(--accent); background-color: #2d2d2d; transform: translateY(-2px); }
 
-        .social-btn i {
-            margin-right: 10px;
-            font-size: 1.1rem;
-        }
+        .thm-badge { margin-top: auto; width: 100%; display: flex; justify-content: center; align-items: center; }
+        .thm-badge iframe { width: 100%; height: 240px; overflow: hidden; }
 
-        .social-btn:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-            background-color: #2d2d2d;
-            transform: translateY(-2px);
-        }
-
-        /* --- TryHackMe Badge --- */
-        .thm-badge {
-            margin-top: 20px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-        }
-
-        .thm-badge iframe {
-            width: 100%;
-            height: 240px; 
-            overflow: hidden;
-        }
-
-        /* --- MAIN CONTENT --- */
         .main-content {
-            flex: 1;
-            padding: 50px 60px;
+            padding: 10px 80px 50px 80px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            /* ZMIANA: Wyrównanie do lewej (startu), a nie do środka */
-            align-items: flex-start; 
+            align-items: flex-start;
+            height: 100%;
+            scrollbar-width: none;
         }
+        .main-content::-webkit-scrollbar { display: none; }
 
         .content-wrapper {
             width: 100%;
             max-width: 900px;
-            /* ZMIANA: Ten margines przesuwa treść w prawo od krawędzi.
-               Dzięki temu jest bliżej lewej strony, ale nie dotyka sidebara.
-               Możesz zmienić 10% na inną wartość (np. 100px), żeby dostosować przerwę. */
-            margin-left: 10%; 
+            margin-left: 5%;
         }
 
+        .hero-section {
+            margin-top: 40px;
+            margin-bottom: 30px; 
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .hero-title { font-size: 2.5rem; color: #fff; margin-bottom: 15px; }
+        .hero-text { font-size: 1.15rem; color: var(--text-muted); line-height: 1.7; }
+        .hero-highlight { color: var(--accent); font-weight: bold; }
+
         .section-title {
-            font-size: 1.8rem;
-            margin-bottom: 30px;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 10px;
-            color: #fff;
-            width: 100%;
-            text-align: left;
+            font-size: 1.6rem; margin-bottom: 25px; color: #fff; border-left: 5px solid var(--accent); padding-left: 20px;
         }
 
         .writeup-card {
             background-color: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 25px;
-            margin-bottom: 20px;
+            border-radius: 10px; padding: 30px; margin-bottom: 25px;
             transition: transform 0.2s, border-color 0.2s;
-            cursor: pointer;
-            text-decoration: none;
-            display: block;
+            cursor: pointer; text-decoration: none; display: block;
+        }
+        .writeup-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+        .writeup-card h3 { margin: 0 0 12px 0; color: var(--accent); font-size: 1.4rem; }
+        .writeup-card p { color: var(--text-muted); margin-bottom: 20px; font-size: 1rem; line-height: 1.6; }
+        
+        .meta-info { font-size: 0.85rem; color: #777; display: flex; justify-content: space-between; align-items: center; }
+        .tag { background-color: #333; color: #fff; padding: 4px 10px; border-radius: 5px; font-size: 0.8rem; font-weight: 600; }
+
+        .right-sidebar {
+            background-color: #151515;
+            border-left: 1px solid var(--border);
+            padding: 40px 30px;
+            height: 100%;
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+        .right-sidebar::-webkit-scrollbar { display: none; }
+
+        .right-section { margin-bottom: 40px; }
+        .right-title {
+            font-size: 0.9rem; text-transform: uppercase; color: var(--text-muted);
+            margin-bottom: 20px; letter-spacing: 1.5px; font-weight: 700; border-bottom: 1px solid #333; padding-bottom: 10px;
         }
 
-        .writeup-card:hover {
-            transform: translateY(-3px);
-            border-color: var(--accent);
-        }
-
-        .writeup-card h3 {
-            margin: 0 0 10px 0;
-            color: var(--accent);
-            font-size: 1.3rem;
-        }
-
-        .writeup-card p {
-            color: var(--text-muted);
+        details {
             margin-bottom: 15px;
-            font-size: 0.95rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        
+        summary {
+            cursor: pointer; padding: 5px 0; color: #fff; font-weight: 600; font-size: 1rem;
+            list-style: none; display: flex; justify-content: space-between; align-items: center;
+            transition: color 0.2s;
+        }
+        summary::-webkit-details-marker { display: none; }
+        summary:hover { color: var(--accent); }
+        summary::after { content: '+'; color: var(--accent); font-weight: bold; }
+        details[open] summary::after { content: '-'; }
+
+        .archive-list { list-style: none; padding: 10px 0 0 10px; margin: 0; }
+        .archive-list li { margin-bottom: 10px; padding-left: 10px; border-left: 2px solid #333; }
+        .archive-list a { text-decoration: none; color: #aaa; font-size: 0.95rem; transition: color 0.2s; display: block; }
+        .archive-list a:hover { color: #fff; border-left-color: var(--accent); }
+        .archive-date { font-size: 0.75rem; color: #555; display: block; margin-top: 2px; }
+
+        .cert-list { list-style: none; padding: 10px 0 0 10px; margin: 0; }
+        .cert-list li { 
+            margin-bottom: 12px; 
+            padding-left: 10px;
+            border-left: 2px solid #333;
+            color: #ccc; 
+            font-size: 0.95rem; 
         }
 
-        .meta-info {
-            font-size: 0.8rem;
-            color: #666;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .tag {
-            background-color: #333;
-            color: #fff;
-            padding: 2px 8px;
+        .status-badge {
+            font-size: 0.65rem;
+            background-color: var(--status-progress);
+            color: #121212;
+            padding: 2px 6px;
             border-radius: 4px;
-            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-left: 8px;
+            display: inline-block;
+            vertical-align: middle;
         }
 
-        @media (max-width: 900px) {
-            .app-container {
-                flex-direction: column;
-            }
-            .sidebar {
-                width: 100%;
-                min-width: 0;
-                height: auto;
-                position: relative;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-                overflow-y: visible;
-            }
-            .main-content {
-                padding: 30px 20px;
-                align-items: center; /* Na telefonie wracamy do środka */
-            }
-            .content-wrapper {
-                margin-left: 0; /* Na telefonie usuwamy margines */
-            }
+        .tools-list { list-style: none; padding: 0; margin: 0; }
+        .tools-list li { margin-bottom: 8px; }
+        .tools-list a { 
+            display: flex; align-items: center; text-decoration: none; color: var(--text-muted); 
+            font-size: 0.95rem; padding: 8px; border-radius: 6px; transition: all 0.2s; 
+            border: 1px solid transparent;
+        }
+        .tools-list a:hover { background-color: #252526; color: #fff; border-color: #333; }
+        .tools-list i { margin-right: 10px; color: var(--accent); font-size: 0.8rem; }
+
+        @media (max-width: 1300px) {
+            body { grid-template-columns: 350px 1fr 280px; }
+        }
+
+        @media (max-width: 1000px) {
+            body { display: flex; flex-direction: column; height: auto; overflow: auto; }
+            .left-sidebar, .right-sidebar { width: 100%; height: auto; border: none; border-bottom: 1px solid var(--border); }
+            .main-content { padding: 40px 20px; align-items: center; height: auto; }
+            .content-wrapper { margin-left: 0; }
+            .thm-badge { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
+    <aside class="left-sidebar">
+        <img src="avatar.jpg" alt="Profile Picture" class="avatar">
+        
+        <h1>Kacper Kontowski</h1>
+        <h2>Cybersecurity Student</h2>
+        
+        <div class="bio">
+            <p>
+                Welcome to my personal website. I document my journey through CTFs, machine breakdowns, and vulnerability research.
+            </p>
+        </div>
 
-        <aside class="sidebar">
-            <img src="avatar.jpg" alt="Profile Picture" class="avatar">
+        <div class="social-links">
+            <a href="https://github.com/Kontowsky" target="_blank" class="social-btn"><i class="fab fa-github"></i> GitHub</a>
+            <a href="https://www.linkedin.com/in/kacper-kontowski-4645a6355/" target="_blank" class="social-btn"><i class="fab fa-linkedin"></i> LinkedIn</a>
+            <a href="mailto:kacperkontowski@gmail.com" class="social-btn"><i class="fas fa-envelope"></i> Contact</a>
+            <a href="https://www.credly.com/users/kacper-kontowski" target="_blank" class="social-btn"><i class="fas fa-certificate"></i> Credly</a>
+        </div>
 
-            <h1>Kacper Kontowski</h1>
-            <h2>Cybersecurity student</h2>
+        <div class="thm-badge">
+            <iframe src="https://tryhackme.com/api/v2/badges/public-profile?userPublicId=3135315" style='border:none;'></iframe>
+        </div>
+    </aside>
 
-            <div class="bio">
-                <p>
-                    Welcome to my digital garden.<br> I document my journey through CTFs, machine breakdowns, and vulnerability research.
+
+    <main class="main-content">
+        <div class="content-wrapper">
+            
+            <div class="hero-section">
+                <h1 class="hero-title">Hello, World!</h1>
+                <p class="hero-text">
+                    I'm <strong>Kontowsky</strong>, an aspiring Penetration Tester and Cybersec enthusiast. 
+                    <br>Currently focusing on <span class="hero-highlight">Web Application Security</span> and grinding through <span class="hero-highlight">TryHackMe</span> paths.
                 </p>
-                <p>
-		Passionate about <strong>Web Security</strong><br>& <strong>Penetration testing</strong>.
-                </p>
             </div>
 
-            <div class="social-links">
-                <a href="https://github.com/Kontowsky" target="_blank" class="social-btn">
-                    <i class="fab fa-github"></i> GitHub
-                </a>
-                <a href="https://www.linkedin.com/in/kacper-kontowski-4645a6355/" target="_blank" class="social-btn">
-                    <i class="fab fa-linkedin"></i> LinkedIn
-                </a>
-                <a href="mailto:kacperkontowski@gmail.com" class="social-btn">
-                    <i class="fas fa-envelope"></i> Contact
-                </a>
-                <a href="https://www.credly.com/users/kacper-kontowski" target="_blank" class="social-btn">
-                    <i class="fas fa-certificate"></i> Credly
-                </a>
-            </div>
+            <h2 class="section-title">Latest Write-ups</h2>
 
-            <div class="thm-badge">
-                <iframe src="https://tryhackme.com/api/v2/badges/public-profile?userPublicId=3135315" style='border:none;'></iframe>
-            </div>
-        </aside>
+            <a href="writeups/billing.html" class="writeup-card">
+                <h3>TryHackMe: Billing</h3>
+                <p>Exploiting CVE-2023-30258 in MagnusBilling and abusing Fail2Ban client-server architecture for root escalation.</p>
+                <div class="meta-info"><span>Dec 12, 2025</span><span class="tag">RCE / Fail2Ban</span></div>
+            </a>
 
-        <main class="main-content">
-            <div class="content-wrapper">
-                
-                <h2 class="section-title">Latest Write-ups</h2>
+            <a href="writeups/lookup.html" class="writeup-card">
+                <h3>TryHackMe: Lookup</h3>
+                <p>Username enumeration via login errors, elFinder RCE, and deep dive into PATH Hijacking via custom binary.</p>
+                <div class="meta-info"><span>Dec 09, 2025</span><span class="tag">PATH Hijacking</span></div>
+            </a>
 
-<a href="writeups/billing.html" class="writeup-card">
-    <h3>TryHackMe: Billing</h3>
-    <p>
-        A guide on exploiting CVE-2023-30258 in MagnusBilling for RCE. 
-        Features a detailed breakdown of abusing Fail2Ban client-server architecture 
-        to achieve root privilege escalation.
-    </p>
-    <div class="meta-info">
-        <span>Dec 12, 2025</span>
-        <span class="tag">RCE / CVE</span>
-    </div>
-</a>
-		<a href="writeups/lookup.html" class="writeup-card">
-    <h3>TryHackMe: Lookup</h3>
-    <p>
-        A medium difficulty room showcasing username enumeration via login error messages,
-        exploiting elFinder RCE, and a deep dive into PATH Hijacking by analyzing and mocking a custom SUID binary.
-    </p>
-    <div class="meta-info">
-        <span>Dec 09, 2025</span>
-        <span class="tag">Hydra / PATH Hijacking</span>
-    </div>
-</a>
-		<a href="writeups/mustacchio.html" class="writeup-card">
-    <h3>TryHackMe: Mustacchio</h3>
-    <p>
-        A walkthrough covering XXE (XML External Entity) injection to steal SSH keys,
-        cracking passphrase-protected keys, and exploiting a custom SUID binary via Path Hijacking.
-    </p>
-    <div class="meta-info">
-        <span>Dec 08, 2025</span>
-        <span class="tag">XXE / SUID</span>
-    </div>
-</a>
-		<a href="writeups/year-of-the-rabbit.html" class="writeup-card">
-    <h3>TryHackMe: Year of the Rabbit</h3>
-    <p>
-        Room involving web enumeration, bypassing client-side redirects with Burp Suite,
-        Brainfuck decoding, and exploiting the CVE-2019-14287 sudo vulnerability to bypass user restrictions.
-    </p>
-    <div class="meta-info">
-        <span>Dec 08, 2025</span>
-        <span class="tag">Sudo / Enumeration</span>
-    </div>
-</a>
-		<a href="writeups/team.html" class="writeup-card">
-    <h3>TryHackMe: Team</h3>
-    <p>
-        A multi-stage CTF involving LFI exploitation to steal SSH keys, command injection
-        for lateral movement, and LXD privilege escalation to gain root access.
-    </p>
-    <div class="meta-info">
-        <span>Dec 07, 2025</span>
-        <span class="tag">SSH / LXD</span>
-    </div>
-</a>
-		<a href="writeups/network-services.html" class="writeup-card">
-    		<h3>TryHackMe: Network Services (AoC 2025)</h3>
-    		<p>
-        	Exploring various network protocols to find hidden keys. We cover scanning UDP ports, 
-        	enumerating FTP and DNS services manually using Netcat and Dig, and accessing an 
-        	internal MySQL database.
-    		</p>
-    		<div class="meta-info">
-        	<span>Dec 07, 2025</span>
-        	<span class="tag">Network Discovery</span>
-    		</div>
-		</a>
-		<a href="writeups/malware-sandbox.html" class="writeup-card">
-    		<h3>TryHackMe: Malware Analysis - Egg-xecutable (AoC 2025)</h3>
-    		<p>
-        	A beginner-friendly guide to Malware Analysis on Windows. We use Static Analysis (PeStudio) 
-        	to find hidden strings and Dynamic Analysis (Regshot, ProcMon) to detect persistence 
-        	mechanisms and C2 network traffic.
-    		</p>
-    		<div class="meta-info">
-        	<span>Dec 07, 2025</span>
-        	<span class="tag">Malware Analysis</span>
-    		</div>
-		</a>
+            <a href="writeups/year-of-the-rabbit.html" class="writeup-card">
+                <h3>TryHackMe: Year of the Rabbit</h3>
+                <p>Burp Suite interception, Brainfuck decoding, and CVE-2019-14287 sudo exploitation.</p>
+                <div class="meta-info"><span>Dec 08, 2025</span><span class="tag">Web / Sudo</span></div>
+            </a>
 
-	        	<a href="writeups/gamingserver.html" class="writeup-card">
-    		<h3>TryHackMe: GamingServer</h3>
-    		<p>
-        	A walkthrough covering web enumeration to find hidden wordlists and SSH keys, 
-        	using John the Ripper to crack encrypted keys, and exploiting the LXD group 
-        	to gain root privileges via container mounting.
-    		</p>
-    		<div class="meta-info">
-        	<span>Dec 06, 2025</span>
-        	<span class="tag">LXD / Alpine</span>
-    		</div>
-		</a>	
-		<a href="writeups/easy-peasy.html" class="writeup-card">
-    		<h3>TryHackMe: Easy Peasy</h3>
-    		<p>
-        	A detailed walkthrough covering full port scanning, web enumeration with Gobuster, 
-        	steganography with Steghide, GOST hash cracking, and privilege escalation via cronjob exploitation.
-    		</p>
-    		<div class="meta-info">
-        	<span>Dec 06, 2025</span>
-        	<span class="tag">Nmap / Hashcat</span>
-    		</div>
-		</a>
+        </div>
+    </main>
 
-                <a href="writeups/idor-aoc2025.html" class="writeup-card">
-                    <h3>TryHackMe: IDOR (AoC 2025)</h3>
-                    <p>
-                        Investigating Insecure Direct Object References in a web application. 
-                        Exploiting User ID, Base64/MD5 encoded Child IDs, and time-based UUID 
-                        vulnerability to claim gift vouchers.
-                    </p>
-                    <div class="meta-info">
-                        <span>Dec 05, 2025</span>
-                        <span class="tag">Web / IDOR</span>
-                    </div>
-                </a>
 
-                <a href="writeups/lian-yu.html" class="writeup-card">
-                    <h3>TryHackMe: Lian_Yu</h3>
-                    <p>
-                        A comprehensive walkthrough of the Lian_Yu room. Features web enumeration 
-                        to discover hidden tickets, steganography analysis using Stegseek, 
-                        and root privilege escalation via pkexec misconfiguration.
-                    </p>
-                    <div class="meta-info">
-                        <span>Dec 05, 2025</span>
-                        <span class="tag">Stegseek / Pkexec</span>
-                    </div>
-                </a>
+    <aside class="right-sidebar">
+        
+        <div class="right-section">
+            <div class="right-title">Write-up Archive</div>
+            
+            <details>
+                <summary>TryHackMe</summary>
+                <ul class="archive-list">
+                    <li><a href="writeups/billing.html">Billing</a><span class="archive-date">Dec 12, 2025</span></li>
+                    <li><a href="writeups/lookup.html">Lookup</a><span class="archive-date">Dec 09, 2025</span></li>
+                    <li><a href="writeups/year-of-the-rabbit.html">Year of the Rabbit</a><span class="archive-date">Dec 08, 2025</span></li>
+                    <li><a href="writeups/mustacchio.html">Mustacchio</a><span class="archive-date">Dec 08, 2025</span></li>
+                    <li><a href="writeups/team.html">Team</a><span class="archive-date">Dec 07, 2025</span></li>
+                    <li><a href="writeups/malware-sandbox.html">Malware Sandbox</a><span class="archive-date">Dec 07, 2025</span></li>
+                    <li><a href="writeups/network-services.html">Network Services</a><span class="archive-date">Dec 07, 2025</span></li>
+                    <li><a href="writeups/gamingserver.html">GamingServer</a><span class="archive-date">Dec 06, 2025</span></li>
+                    <li><a href="writeups/easy-peasy.html">Easy Peasy</a><span class="archive-date">Dec 06, 2025</span></li>
+                    <li><a href="writeups/wgel-ctf.html">Wgel CTF</a><span class="archive-date">Dec 05, 2025</span></li>
+                    <li><a href="writeups/lian-yu.html">Lian_Yu</a><span class="archive-date">Dec 05, 2025</span></li>
+                    <li><a href="writeups/chocolate-factory.html">Chocolate Factory</a><span class="archive-date">Dec 05, 2025</span></li>
+                    <li><a href="writeups/idor-aoc2025.html">IDOR (AoC)</a><span class="archive-date">Dec 05, 2025</span></li>
+                </ul>
+            </details>
 
-                <a href="writeups/wgel-ctf.html" class="writeup-card">
-                    <h3>TryHackMe: Wgel CTF</h3>
-                    <p>
-                        A walkthrough of the Wgel CTF room. Includes enumeration of hidden web directories,
-                        extracting SSH keys, and exploiting sudo rights on the wget binary to exfiltrate the root flag.
-                    </p>
-                    <div class="meta-info">
-                        <span>Dec 05, 2025</span>
-                        <span class="tag">Netcat / Wget</span>
-                    </div>
-                </a>
+            <details>
+                <summary>HackTheBox</summary>
+                <ul class="archive-list">
+                    <li><span style="color: #666; font-style: italic;">Coming Soon...</span></li>
+                </ul>
+            </details>
+        </div>
 
-                <a href="writeups/chocolate-factory.html" class="writeup-card">
-                    <h3>TryHackMe: Chocolate Factory</h3>
-                    <p>
-                        A detailed walkthrough of the Chocolate Factory room. Covers Nmap scanning,
-                        steganography (hidden files in images), password cracking using Hashcat,
-                        and privilege escalation via sudo.
-                    </p>
-                    <div class="meta-info">
-                        <span>Dec 05, 2025</span>
-                        <span class="tag">FTP / Python</span>
-                    </div>
-                </a>
-                
-            </div>
-        </main>
-    </div>
+        <div class="right-section">
+            <details>
+                <summary>Certifications</summary>
+                <ul class="cert-list">
+                    <li>
+                        TryHackMe: PT1 <span class="status-badge">IN PROGRESS</span>
+                    </li>
+                </ul>
+            </details>
+        </div>
 
+        <div class="right-section">
+            <div class="right-title">Essential Tools</div>
+            <ul class="tools-list">
+                <li><a href="https://gtfobins.github.io/" target="_blank"><i class="fas fa-terminal"></i> GTFOBins</a></li>
+                <li><a href="https://www.revshells.com/" target="_blank"><i class="fas fa-code"></i> RevShells.com</a></li>
+                <li><a href="https://gchq.github.io/CyberChef/" target="_blank"><i class="fas fa-cookie-bite"></i> CyberChef</a></li>
+                <li><a href="https://book.hacktricks.xyz/" target="_blank"><i class="fas fa-book"></i> HackTricks</a></li>
+                <li><a href="https://github.com/danielmiessler/SecLists" target="_blank"><i class="fas fa-list"></i> SecLists</a></li>
+                <li><a href="https://github.com/swisskyrepo/PayloadsAllTheThings" target="_blank"><i class="fas fa-bomb"></i> PayloadsAllTheThings</a></li>
+                <li><a href="https://www.shodan.io/" target="_blank"><i class="fas fa-globe"></i> Shodan</a></li>
+                <li><a href="https://www.exploit-db.com/" target="_blank"><i class="fas fa-bug"></i> Exploit-DB</a></li>
+                <li><a href="https://www.wappalyzer.com/" target="_blank"><i class="fas fa-layer-group"></i> Wappalyzer</a></li>
+            </ul>
+        </div>
+
+    </aside>
 <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "ed03f38c876b450aad0249d433086aae"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
