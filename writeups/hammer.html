@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hammer Write-up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --bg-sidebar: #181818;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --accent: #00bcd4;
+            --accent-hover: #008ba3;
+            --border: #333333;
+            --code-bg: #2d2d2d;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .sidebar-nav {
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .back-link {
+            display: block;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover { color: #fff; }
+
+        .article-content {
+            flex: 1;
+            padding: 50px 80px;
+            overflow-y: auto;
+            line-height: 1.8;
+        }
+
+        .machine-info, .toc {
+            width: 100%;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .machine-info h3, .toc h3, .tools-section h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .machine-info ul, .toc ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .machine-info li {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .toc li { margin-bottom: 8px; }
+
+        .toc a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            transition: color 0.2s, padding-left 0.2s;
+            display: block;
+        }
+
+        .toc a:hover {
+            color: var(--accent);
+            padding-left: 5px;
+        }
+
+        h1 { font-size: 2.5rem; margin-bottom: 10px; color: #fff; }
+        h2 { font-size: 1.8rem; margin-top: 40px; margin-bottom: 20px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        h3 { font-size: 1.4rem; margin-top: 30px; margin-bottom: 15px; color: #fff; }
+        p { color: var(--text-muted); margin-bottom: 20px; font-size: 1rem; }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            color: #ff79c6;
+        }
+
+        img.screenshot {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin: 20px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            display: block;
+        }
+
+        .meta-tags { margin-bottom: 40px; font-size: 0.9rem; color: #666; }
+        .tag { background-color: var(--bg-card); padding: 4px 10px; border-radius: 4px; margin-right: 10px; border: 1px solid var(--border); }
+
+        .tools-section { width: 100%; margin-top: 30px; text-align: left; }
+        .tool-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+        .tool-badge {
+            background-color: #252526; color: #e0e0e0; font-size: 0.8rem; padding: 5px 10px; border-radius: 4px;
+            border: 1px solid var(--border); cursor: default; transition: all 0.2s ease;
+        }
+        .tool-badge:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+
+        @media (max-width: 768px) {
+            .app-container { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: relative; }
+            .article-content { padding: 30px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-nav">
+                <a href="../index.html" class="back-link">← Back to Home</a>
+            </div>
+
+            <div class="machine-info">
+                <h3>Target Info</h3>
+                <ul>
+                    <li><strong>Name:</strong> Hammer</li>
+                    <li><strong>Site:</strong> TryHackMe</li>
+                    <li><strong>OS:</strong> <span style="color: #ff79c6;">Linux</span></li>
+                    <li><strong>Difficulty:</strong> <span style="color: #ffb86c;">Medium</span></li>
+                </ul>
+            </div>
+
+            <div class="toc">
+                <h3>Table of Contents</h3>
+                <ul>
+                    <li><a href="#recon">1. Reconnaissance</a></li>
+                    <li><a href="#fuzzing">2. Directory Fuzzing</a></li>
+                    <li><a href="#ratelimit">3. Rate-Limit Bypass</a></li>
+                    <li><a href="#initial">4. Initial Access</a></li>
+                    <li><a href="#privesc">5. Privilege Escalation</a></li>
+                </ul>
+            </div>
+
+            <div class="tools-section">
+                <h3>Tools Arsenal</h3>
+                <div class="tool-tags">
+                    <span class="tool-badge">Nmap</span>
+                    <span class="tool-badge">Ffuf</span>
+                    <span class="tool-badge">Burp Suite</span>
+                    <span class="tool-badge">JWT.io</span>
+                    <span class="tool-badge">Curl</span>
+                </div>
+            </div>
+
+            <div style="text-align: center; color: var(--text-muted); margin-top: auto;">
+                <p>Created by <strong style="color: #fff;">Kontowsky</strong></p>
+            </div>
+        </aside>
+
+        <article class="article-content">
+            <h1>TryHackMe: Hammer</h1>
+            <div class="meta-tags">
+                <span class="tag">TryHackMe</span>
+                <span class="tag">Rate-Limit Bypass</span>
+                <span class="tag">JWT Manipulation</span>
+                <span class="tag">May 13, 2026</span>
+            </div>
+
+            <p>
+                Hammer is an excellent Medium-difficulty room on TryHackMe that highlights how minor logical oversights in security mechanisms can lead to a complete system compromise. This write-up documents the process of bypassing rate-limiting implementation via HTTP header spoofing, followed by exploiting a JWT Key Confusion / Path Traversal flaw in order to forge an administrative token and execute arbitrary commands.
+            </p>
+
+            <h2 id="recon">1. Reconnaissance</h2>
+            <p>
+                As always, the engagement starts with a standard Nmap scan to discover open ports and understand the external attack surface.
+            </p>
+            <pre><code>$ sudo nmap -T4 10.112.146.178</code></pre>
+            <img src="images_hammer/image-539.png" alt="Nmap Scan Report" class="screenshot">
+
+            <p>
+                The initial scan reveals two open ports: port 22 (SSH) and a non-standard port 1337. To gather deeper intelligence on the running services, a targeted version scan was performed:
+            </p>
+            <pre><code>$ sudo nmap -p 22,1337 -sV -T4 10.112.146.178</code></pre>
+            
+            <p>
+                Port 1337 is hosting an Apache 2.4.41 web server. Navigating to <code>http://10.112.146.178:1337</code> presents a minimalist and secure-looking login web interface.
+            </p>
+            <img src="images_hammer/image-540.png" alt="Login Form" class="screenshot">
+
+            <h2 id="fuzzing">2. Directory Fuzzing & Fingerprinting</h2>
+            <p>
+                Inspecting the HTML source code of the login portal reveals a developer note comment that hints at a strict directory naming convention.
+            </p>
+            <img src="images_hammer/image-541.png" alt="Page Source Comment" class="screenshot">
+            <blockquote>
+                <code>&lt;!-- Dev Note: Directory naming convention must be hmr_DIRECTORY_NAME --&gt;</code>
+            </blockquote>
+
+            <p>
+                Armed with this pattern, we can execute a directory brute-force attack using <code>ffuf</code> by prefixing the fuzzing parameter with <code>hmr_</code>:
+            </p>
+            <pre><code>$ ffuf -w /usr/share/wordlists/dirb/common.txt -u http://10.112.146.178:1337/hmr_FUZZ</code></pre>
+            <img src="images_hammer/image-542.png" alt="Ffuf Directory Fuzzing" class="screenshot">
+
+            <p>
+                Beyond standard assets, the fuzzer reveals a hidden <code>/hmr_logs</code> directory. Reviewing the contents exposed an <code>error.logs</code> file. Deep analysis of these logged anomalies leaked a target username/email address: <code>tester@hammer.thm</code>.
+            </p>
+            <img src="images_hammer/image-543.png" alt="Error Logs Analysis" class="screenshot">
+
+            <h2 id="ratelimit">3. Rate-Limit Bypass (IP Spoofing)</h2>
+            <p>
+                We feed the discovered email address into the password recovery feature at <code>/reset_password.php</code>. The backend generates a 4-digit verification code and initiates a tight 180-second countdown window.
+            </p>
+            <img src="images_hammer/image-545.png" alt="Reset Password Code Form" class="screenshot">
+            
+            <p>
+                Since a 4-digit code only allows for 10,000 possible combinations (0000-9999), it is highly susceptible to an automated brute-force attack. However, submitting continuous requests immediately flags a rate-limit constraint. The response headers include a <code>Rate-Limit-Pending</code> counter that drops by 1 per attempt until the client IP is blocked.
+            </p>
+            <img src="images_hammer/image-546.png" alt="Rate-Limit Block Detection" class="screenshot">
+
+            <p>
+                Web applications running behind reverse proxies or load balancers often rely on specific HTTP headers to identify the source client IP. To test if the rate-limiter is vulnerable to identity spoofing, we can attempt to inject the <code>X-Forwarded-For</code> header. Testing verifies that dynamically cycling this header resets the server-side strike counter.
+            </p>
+            <img src="images_hammer/image-547.png" alt="X-Forwarded-For Bypass Technique" class="screenshot">
+
+            <p>
+                We generate the complete list of possible combinations locally using a simple terminal loop and store it into `codes.txt`:
+            </p>
+            <pre><code>$ for i in {0000..9999}; do echo $i; done > codes.txt
+$ cat codes.txt | tail -n 5</code></pre>
+            <img src="images_hammer/image-548.png" alt="Generating Wordlist" class="screenshot">
+
+            <p>
+                With the list prepared, we orchestrate a synchronized <code>ffuf</code> payload delivery. The fuzzer passes the code values into the POST data while concurrently rotating the <code>X-Forwarded-For</code> address space to successfully keep the threshold counter refreshed:
+            </p>
+            <pre><code>$ ffuf -w codes.txt -u "http://10.112.146.178:1337/reset_password.php" -X "POST" -H "Cookie: PHPSESSID=vo00iuln92fnoibdtcota717hd" -H "X-Forwarded-For: 127.0.0.FUZZ" -H "Content-Type: application/x-www-form-urlencoded" -d "recovery_code=FUZZ&s=169" -fr "Invalid"</code></pre>
+            <img src="images_hammer/image-549.png" alt="Ffuf Attack Success" class="screenshot">
+            <p>
+                The brute-force succeeds, pinpointing the true recovery code: <strong>8419</strong> (returning a clean 200 OK status).
+            </p>
+
+            <h2 id="initial">4. Initial Access & Session Analysis</h2>
+            <p>
+                Submitting the correct code forwards us to the password override page, where we reset credentials for the compromised user account.
+            </p>
+            <img src="images_hammer/image-544.png" alt="Password Reset Form" class="screenshot">
+
+            <p>
+                Logging into the dashboard rewards us with initial access and reveals the first flag (User Flag). The application also exposes an interactive command entry terminal zone.
+            </p>
+            <img src="images_hammer/image-550.png" alt="Dashboard Entry & User Flag" class="screenshot">
+
+            <p>
+                When attempting execution, most system utilities return strict execution blockades due to an aggressive command blacklist. Furthermore, the portal frequently terminates active sessions every 20-30 seconds. Source code review confirms that the web application uses a hardcoded JWT string with an excessively short Time-To-Live (TTL) parameter.
+            </p>
+            <img src="images_hammer/image-551.png" alt="Hardcoded Short-Lived JWT Code" class="screenshot">
+
+            <h2 id="privesc">5. Privilege Escalation (JWT Key Confusion / Path Traversal)</h2>
+            <p>
+                By filtering a directory traversal command through Burp Suite, I listed the working folder structure and found an interesting file named <code>188ade1.key</code>. Standard viewing utilities like <code>cat</code> or <code>less</code> are entirely blacklisted within the console.
+            </p>
+            <img src="images_hammer/image-552.png" alt="Directory Listing Interception" class="screenshot">
+
+            <p>
+                Since the application is running out of the standard webroot, I fetched the file directly via a targeted <code>curl</code> request to bypass the console filter entirely:
+            </p>
+            <pre><code>$ curl http://10.112.146.178:1337/188ade1.key</code></pre>
+            <img src="images_hammer/image-554.png" alt="Downloading Secret Key" class="screenshot">
+
+            <p>
+                Next, I captured the current active JWT token and inspected its structure inside <code>jwt.io</code>. The token header exposes a <code>kid</code> (Key ID) field mapping the verification file location: <code>"kid": "/var/www/mykey.key"</code>.
+            </p>
+            <img src="images_hammer/image-553.png" alt="Original JWT Structure" class="screenshot">
+
+            <p>
+                This pattern indicates a classic <strong>JWT Path Traversal flaw within the KID parameter</strong>. If the application does not validate or sanitize this string value, an attacker can manipulate the file path to point to a known file on the system, forcing the application to use it as the HMAC signing secret.
+                
+                I forged an upgraded administrative token with the following structure:
+                <ul>
+                    <li>Modified the <code>kid</code> path header to point to our exposed and readable file: <code>/var/www/html/188ade1.key</code>.</li>
+                    <li>Altered the payload data structure, elevating the <code>role</code> property from <code>user</code> to <code>admin</code>.</li>
+                    <li>Pasted the raw alphanumeric content of <code>188ade1.key</code> straight into the signature verification box.</li>
+                </ul>
+            </p>
+            <img src="images_hammer/image-555.png" alt="Forged Admin JWT Token" class="screenshot">
+
+            <p>
+                Upon receiving this token, the server references the specified path, consumes our exposed key file, matches our computed signature, and evaluates the token as valid, immediately assigning us full administrative rights.
+                
+                As an administrative operator, all command filtering policies are dropped. Injecting the modified header string into our Burp request allows us to read the root flag located inside the target home folder:
+            </p>
+            <pre><code>"command":"cat /home/ubuntu/flag.txt"</code></pre>
+            <img src="images_hammer/image-556.png" alt="Final Root Flag Extraction" class="screenshot">
+            
+            <p>
+                The host is fully compromised! This room offers a spectacular demonstration of the risks associated with improper validation of cryptographic header parameters.
+            </p>
+        </article>
+    </div>
+
+</body>
+</html>
